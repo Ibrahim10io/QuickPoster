@@ -8,7 +8,9 @@
     <title>QUICKPOSTER — Accueil</title>
     <link rel="stylesheet" href="styles.css">
     <script src="vendor/html2canvas.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
     <script src="app.js" defer></script>
+    <script src="auth.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -53,6 +55,7 @@
       <main class="main-content">
         <header class="topbar">
           <div class="breadcrumb"><span>Votre espace</span><span class="breadcrumb-separator">/</span><strong id="page-label">Accueil</strong></div>
+          <button class="topbar-link auth-open-button" id="auth-open-button" type="button">Mon compte</button>
           <a class="topbar-link" href="#nouvelle-affiche">
             <span class="topbar-plus" aria-hidden="true">+</span>
             Nouvelle affiche
@@ -299,5 +302,28 @@
         </div>
       </main>
     </div>
+    <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-title">
+      <div class="auth-dialog-header">
+        <div>
+          <p class="eyebrow muted-eyebrow">ESPACE PERSONNEL</p>
+          <h2 id="auth-title">Bienvenue sur QUICKPOSTER</h2>
+        </div>
+        <button class="auth-close-button" id="auth-close-button" type="button" aria-label="Fermer">×</button>
+      </div>
+      <p class="auth-intro" id="auth-intro">Connectez-vous ou créez un compte pour retrouver votre espace.</p>
+      <form id="auth-form" class="auth-form">
+        <label for="auth-email">Adresse e-mail</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="vous@exemple.fr">
+        <label for="auth-password">Mot de passe</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="72" placeholder="8 caractères minimum">
+        <button class="primary-button auth-submit-button" id="auth-submit-button" type="submit">Se connecter</button>
+      </form>
+      <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+      <div class="auth-dialog-footer">
+        <button class="text-link auth-mode-button" id="auth-mode-button" type="button">Créer un compte</button>
+        <button class="text-link auth-signout-button" id="auth-signout-button" type="button" hidden>Se déconnecter</button>
+      </div>
+      <p class="auth-privacy-note">Ne partagez jamais votre mot de passe. La création d’un compte sera ouverte au public après vérification des règles de confidentialité et de protection des données.</p>
+    </dialog>
   </body>
 </html>
