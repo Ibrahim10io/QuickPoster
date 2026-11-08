@@ -89,7 +89,7 @@
     showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
     try {
       const result = mode === "signup"
-        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + window.location.pathname } })
+        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/" } })
         : await client.auth.signInWithPassword({ email, password });
 
       if (result.error) throw result.error;
