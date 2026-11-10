@@ -15,7 +15,9 @@ const checks = [
   ["Logout is implemented", /client\.auth\.signOut\(/.test(auth)],
   ["The page loads the Supabase client before auth.js", html.indexOf("@supabase/supabase-js") < html.indexOf('src="auth.js"')],
   ["The poster editor is present", html.includes('id="poster-form"')],
-  ["Poster data is currently stored locally (known pre-launch limitation)", app.includes("localStorage")],
+  ["Poster creations can be saved to Supabase", app.includes('.from("creations")') && app.includes("saveCloudCreation")],
+  ["Cloud records are queried for the signed-in user", app.includes('.eq("user_id", user.id)')],
+  ["Local fallback remains available", app.includes("localStorage")],
 ];
 
 let failed = 0;
@@ -25,4 +27,4 @@ for (const [label, passed] of checks) {
 }
 
 assert.equal(failed, 0, `${failed} QUICKPOSTER check(s) failed.`);
-console.log(`\\nAll ${checks.length} project checks passed.`);
+console.log(`\nAll ${checks.length} project checks passed.`);
