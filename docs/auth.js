@@ -23,8 +23,7 @@
   }
 
   const client = window.supabase.createClient(config.url, config.publishableKey);
-  const isSignupCallback = new URLSearchParams(window.location.search).get("auth") === "signup";
-  let mode = isSignupCallback ? "signup" : "login";
+  let mode = "login";
   let currentUser = null;
 
   function showStatus(message, isError = false) {
@@ -90,7 +89,7 @@
     showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
     try {
       const result = mode === "signup"
-        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/?auth=signup" } })
+        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/" } })
         : await client.auth.signInWithPassword({ email, password });
 
       if (result.error) throw result.error;
@@ -125,25 +124,13 @@
 
   client.auth.getSession().then(({ data, error }) => {
     if (error) showStatus("Impossible de vérifier la session.", true);
-    const user = data?.session?.user || null;
-    updateAccount(user);
-    if (isSignupCallback) {
-      if (dialog.showModal && !dialog.open) dialog.showModal();
-      if (user) {
-        showStatus("Adresse confirmée : vous êtes maintenant connecté à QUICKPOSTER.");
-      } else {
-        showStatus("Confirmation reçue. Connectez-vous pour accéder à votre compte.");
-      }
-    }
+    updateAccount(data?.session?.user || null);
   });
 
   client.auth.onAuthStateChange((event, session) => {
     updateAccount(session?.user || null);
     if (event === "SIGNED_IN" && session?.user) {
-      showStatus(isSignupCallback
-        ? "Adresse confirmée : vous êtes maintenant connecté à QUICKPOSTER."
-        : "Connexion réussie.");
-      if (isSignupCallback && dialog.showModal && !dialog.open) dialog.showModal();
+      showStatus("Vous êtes connecté à QUICKPOSTER.");
     }
   });
 })();
