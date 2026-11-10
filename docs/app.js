@@ -924,7 +924,7 @@ if (form) {
     });
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", async (event) => {
     const pdfExportButton = event.target.closest("[data-download-creation-pdf]");
     if (pdfExportButton) {
       const creation = readCreations().find((item) => item.id === pdfExportButton.dataset.downloadCreationPdf);
