@@ -95,7 +95,7 @@
       if (result.error) throw result.error;
 
       if (mode === "signup" && !result.data.session) {
-        showStatus("Compte créé. Consultez votre boîte e-mail pour confirmer votre adresse avant de vous connecter.");
+        showStatus("Compte créé ! Ouvrez l’e-mail de confirmation. Après validation, QUICKPOSTER vous reconnectera automatiquement.");
       } else {
         updateAccount(result.data.user);
         showStatus(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
@@ -127,7 +127,10 @@
     updateAccount(data?.session?.user || null);
   });
 
-  client.auth.onAuthStateChange((_event, session) => {
+  client.auth.onAuthStateChange((event, session) => {
     updateAccount(session?.user || null);
+    if (event === "SIGNED_IN" && session?.user) {
+      showStatus("Adresse confirmée : vous êtes maintenant connecté à QUICKPOSTER.");
+    }
   });
 })();
