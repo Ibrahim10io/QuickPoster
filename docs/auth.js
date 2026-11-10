@@ -122,6 +122,18 @@
     showStatus("Vous êtes déconnecté.");
   });
 
+  async function refreshSession() {
+    const { data, error } = await client.auth.getSession();
+    if (error) {
+      showStatus("Impossible de vérifier la session.", true);
+      return;
+    }
+    if (data?.session?.user) {
+      updateAccount(data.session.user);
+      showStatus("Compte connecté. Vous pouvez continuer sur cet onglet.");
+    }
+  }
+
   client.auth.getSession().then(({ data, error }) => {
     if (error) showStatus("Impossible de vérifier la session.", true);
     updateAccount(data?.session?.user || null);
@@ -132,5 +144,12 @@
     if (event === "SIGNED_IN" && session?.user) {
       showStatus("Vous êtes connecté à QUICKPOSTER.");
     }
+  });
+
+  // If email confirmation opens another tab, refresh this original tab
+  // as soon as the user returns to it.
+  window.addEventListener("focus", refreshSession);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshSession();
   });
 })();
