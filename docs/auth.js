@@ -16,6 +16,12 @@
   const status = document.querySelector("#auth-status");
   const intro = document.querySelector("#auth-intro");
   const title = document.querySelector("#auth-title");
+  const emailLabel = document.querySelector('label[for="auth-email"]');
+  const passwordLabel = document.querySelector('label[for="auth-password"]');
+  const otpLabel = document.querySelector("#auth-otp-label");
+  const otpInput = document.querySelector("#auth-otp");
+  const resendButton = document.querySelector("#auth-resend-button");
+  let awaitingSignupCode = false;
 
   if (!dialog || !window.supabase?.createClient) {
     if (openButton) openButton.disabled = true;
@@ -41,6 +47,17 @@
     submitButton.textContent = creating ? "Créer mon compte" : "Se connecter";
     modeButton.textContent = creating ? "J’ai déjà un compte" : "Créer un compte";
     passwordInput.autocomplete = creating ? "new-password" : "current-password";
+    awaitingSignupCode = false;
+    emailInput.disabled = false;
+    passwordInput.disabled = false;
+    emailLabel.hidden = false;
+    emailInput.hidden = false;
+    passwordLabel.hidden = false;
+    passwordInput.hidden = false;
+    otpLabel.hidden = true;
+    otpInput.hidden = true;
+    resendButton.hidden = true;
+    otpInput.value = "";
     showStatus("");
   }
 
@@ -86,25 +103,55 @@
     }
 
     submitButton.disabled = true;
-    showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
     try {
-      const result = mode === "signup"
-        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/" } })
-        : await client.auth.signInWithPassword({ email, password });
-
-      if (result.error) throw result.error;
-
-      if (mode === "signup" && !result.data.session) {
-        showStatus("Compte créé ! Gardez cet onglet ouvert, puis ouvrez l’e-mail de confirmation. Revenez ici après validation : votre compte se connectera automatiquement sur cet onglet.");
+      if (awaitingSignupCode) {
+        const code = otpInput.value.trim();
+        if (!/^\\d{6}$/.test(code)) throw new Error("Saisissez le code à 6 chiffres reçu par e-mail.");
+        showStatus("Vérification du code…");
+        const { data, error } = await client.auth.verifyOtp({ email: emailInput.value.trim(), token: code, type: "signup" });
+        if (error) throw error;
+        awaitingSignupCode = false;
+        updateAccount(data.user);
+        showStatus("Adresse e-mail vérifiée. Vous êtes connecté à QUICKPOSTER.");
       } else {
-        updateAccount(result.data.user);
-        showStatus(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        if (!email || password.length < 8) throw new Error("Saisissez une adresse e-mail valide et un mot de passe d’au moins 8 caractères.");
+        showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
+        const result = mode === "signup"
+          ? await client.auth.signUp({ email, password })
+          : await client.auth.signInWithPassword({ email, password });
+        if (result.error) throw result.error;
+        if (mode === "signup" && !result.data.session) {
+          awaitingSignupCode = true;
+          emailLabel.hidden = true;
+          emailInput.hidden = true;
+          passwordLabel.hidden = true;
+          passwordInput.hidden = true;
+          otpLabel.hidden = false;
+          otpInput.hidden = false;
+          resendButton.hidden = false;
+          otpInput.focus();
+          submitButton.textContent = "Vérifier mon adresse e-mail";
+          modeButton.hidden = true;
+          showStatus("Un code de vérification vient d’être envoyé à " + email + ". Saisissez-le ici pour activer votre compte.");
+        } else {
+          updateAccount(result.data.user);
+          showStatus(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
+        }
       }
     } catch (error) {
       showStatus(error.message || "Une erreur est survenue. Réessayez.", true);
     } finally {
       submitButton.disabled = false;
     }
+  });
+
+  resendButton.addEventListener("click", async () => {
+    resendButton.disabled = true;
+    const { error } = await client.auth.resend({ type: "signup", email: emailInput.value.trim() });
+    resendButton.disabled = false;
+    showStatus(error ? (error.message || "Impossible de renvoyer le code.") : "Un nouveau code vient d’être envoyé.");
   });
 
   signoutButton.addEventListener("click", async () => {
