@@ -1,0 +1,28 @@
+name: QUICKPOSTER checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  project-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          node --check docs/app.js
+          node --check docs/auth.js
+          node --check scripts/check-project.mjs
+      - name: Run QUICKPOSTER project checks
+        run: node scripts/check-project.mjs
