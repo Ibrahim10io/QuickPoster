@@ -95,7 +95,7 @@
       if (result.error) throw result.error;
 
       if (mode === "signup" && !result.data.session) {
-        showStatus("Compte créé ! Ouvrez l’e-mail de confirmation. Après validation, QUICKPOSTER vous reconnectera automatiquement.");
+        showStatus("Compte créé ! Gardez cet onglet ouvert, puis ouvrez l’e-mail de confirmation. Revenez ici après validation : votre compte se connectera automatiquement sur cet onglet.");
       } else {
         updateAccount(result.data.user);
         showStatus(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
