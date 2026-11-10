@@ -5,7 +5,99 @@ const routes = {
   historique: "Historique des créations",
 };
 
+
 const storageKey = "quickposter.creations.v1";
+const cloudConfig = {
+  url: "https://yhghivyejpavymjcbqnr.supabase.co",
+  publishableKey: "sb_publishable_tsG8rK7NjTU6HsMTtVM2qw_-k0MIZAi",
+};
+const cloudClient = window.supabase?.createClient
+  ? window.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey)
+  : null;
+let cloudUser = null;
+let cloudSyncVersion = 0;
+
+function toCloudCreation(creation, userId) {
+  return {
+    id: creation.id,
+    user_id: userId,
+    title: creation.title,
+    poster_data: {
+      subtitle: creation.subtitle,
+      texts: creation.texts,
+      template: creation.template,
+      colors: creation.colors,
+    },
+    created_at: creation.createdAt,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function fromCloudCreation(row) {
+  const data = row.poster_data || {};
+  return {
+    id: row.id,
+    title: row.title,
+    subtitle: data.subtitle || "",
+    texts: data.texts || {},
+    template: data.template || "atelier",
+    colors: data.colors || { background: "#ffffff", accent: "#222222" },
+    createdAt: row.created_at,
+  };
+}
+
+async function loadCloudCreations(user) {
+  if (!cloudClient || !user) return;
+  const version = ++cloudSyncVersion;
+  const { data, error } = await cloudClient
+    .from("creations")
+    .select("id,title,poster_data,created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  if (version !== cloudSyncVersion || cloudUser?.id !== user.id) return;
+  const creations = (data || []).map(fromCloudCreation);
+  window.localStorage.setItem(storageKey, JSON.stringify(creations));
+  renderSavedCreations();
+}
+
+async function saveCloudCreation(creation) {
+  if (!cloudClient || !cloudUser) return false;
+  const { error } = await cloudClient
+    .from("creations")
+    .upsert(toCloudCreation(creation, cloudUser.id), { onConflict: "id" });
+  if (error) throw error;
+  return true;
+}
+
+async function deleteCloudCreation(creationId) {
+  if (!cloudClient || !cloudUser) return false;
+  const { error } = await cloudClient
+    .from("creations")
+    .delete()
+    .eq("id", creationId)
+    .eq("user_id", cloudUser.id);
+  if (error) throw error;
+  return true;
+}
+
+if (cloudClient) {
+  cloudClient.auth.onAuthStateChange((event, session) => {
+    const nextUser = session?.user || null;
+    if (nextUser?.id !== cloudUser?.id) {
+      cloudUser = nextUser;
+      if (cloudUser) {
+        loadCloudCreations(cloudUser).catch((error) => {
+          console.error("Synchronisation QUICKPOSTER impossible", error);
+        });
+      } else {
+        cloudSyncVersion += 1;
+        window.localStorage.removeItem(storageKey);
+        renderSavedCreations();
+      }
+    }
+  });
+}
 const views = [...document.querySelectorAll("[data-view]")];
 const navigationLinks = [...document.querySelectorAll("[data-route]")];
 const mobileMenuToggle = document.querySelector("#mobile-menu-toggle");
@@ -37,7 +129,7 @@ if (mobileMenuToggle && mainNav) {
     }
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", async (event) => {
     if (!mobileMenuToggle.closest(".sidebar").contains(event.target)) {
       setMobileMenuOpen(false);
       if (mainNav.contains(document.activeElement)) mobileMenuToggle.focus();
@@ -770,12 +862,12 @@ if (form) {
     }
   });
 
-  saveButton.addEventListener("click", () => {
+  saveButton.addEventListener("click", async () => {
     if (poster.hidden) return;
 
     updateRequiredValidity();
     if (!form.reportValidity()) {
-      statusMessage.textContent = "Veuillez renseigner les champs obligatoires avant d’enregistrer.";
+      statusMessage.textContent = "Veuillez renseigner les champs obligatoires.";
       return;
     }
 
@@ -793,7 +885,7 @@ if (form) {
 
     const creation = {
       ...data,
-      id: duplicate?.id || (crypto.randomUUID?.() || `creation-${Date.now()}-${Math.random().toString(16).slice(2)}`),
+      id: duplicate?.id || crypto.randomUUID(),
       createdAt: duplicate?.createdAt || new Date().toISOString(),
     };
 
@@ -801,16 +893,26 @@ if (form) {
       ? creations.map((item) => item.id === duplicate.id ? creation : item)
       : [creation, ...creations];
 
+    saveButton.disabled = true;
+    statusMessage.textContent = cloudUser
+      ? "Enregistrement sécurisé dans votre compte…"
+      : "Enregistrement sur cet appareil…";
     try {
+      if (cloudUser) await saveCloudCreation(creation);
       window.localStorage.setItem(storageKey, JSON.stringify(nextCreations));
       activeCreationId = creation.id;
       setSaveButtonLabel();
       renderSavedCreations();
       statusMessage.textContent = duplicate
-        ? "Cette affiche existe déjà ; ses modifications ont été enregistrées."
-        : "Affiche enregistrée dans Mes créations.";
-    } catch {
-      statusMessage.textContent = "Impossible d’enregistrer cette affiche dans le stockage local.";
+        ? "Modifications enregistrées."
+        : (cloudUser ? "Affiche enregistrée dans votre compte." : "Affiche enregistrée sur cet appareil. Connectez-vous pour la retrouver sur vos autres appareils.");
+    } catch (error) {
+      console.error("Échec de l’enregistrement", error);
+      statusMessage.textContent = cloudUser
+        ? "La synchronisation avec votre compte a échoué. Vérifiez votre connexion puis réessayez."
+        : "Impossible d’enregistrer cette affiche sur cet appareil.";
+    } finally {
+      saveButton.disabled = false;
     }
   });
 
@@ -876,7 +978,9 @@ if (form) {
     const creation = creations.find((item) => item.id === deleteButton.dataset.deleteCreation);
     if (!creation || !window.confirm(`Supprimer « ${creation.title} » ?`)) return;
 
+    deleteButton.disabled = true;
     try {
+      if (cloudUser) await deleteCloudCreation(creation.id);
       window.localStorage.setItem(storageKey, JSON.stringify(
         creations.filter((item) => item.id !== creation.id),
       ));
@@ -885,8 +989,12 @@ if (form) {
         setSaveButtonLabel();
       }
       renderSavedCreations();
-    } catch {
-      statusMessage.textContent = "Impossible de supprimer cette affiche du stockage local.";
+      statusMessage.textContent = "Affiche supprimée.";
+    } catch (error) {
+      console.error("Échec de la suppression", error);
+      statusMessage.textContent = "Impossible de supprimer cette affiche. Réessayez.";
+    } finally {
+      deleteButton.disabled = false;
     }
   });
 
