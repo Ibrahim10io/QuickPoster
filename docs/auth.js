@@ -106,7 +106,7 @@
     try {
       if (awaitingSignupCode) {
         const code = otpInput.value.trim();
-        if (!/^\\d{6}$/.test(code)) throw new Error("Saisissez le code à 6 chiffres reçu par e-mail.");
+        if (!/^\d{6}$/.test(code)) throw new Error("Saisissez le code à 6 chiffres reçu par e-mail.");
         showStatus("Vérification du code…");
         const { data, error } = await client.auth.verifyOtp({ email: emailInput.value.trim(), token: code, type: "signup" });
         if (error) throw error;
