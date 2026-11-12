@@ -1173,3 +1173,41 @@ h1, h2 { font-family: "Manrope", "Segoe UI", sans-serif; }
     white-space: nowrap;
   }
 }
+
+
+/* Navigation mobile : le compte reste accessible en haut, sans chevauchement. */
+@media (max-width: 760px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 0;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .topbar .auth-open-button {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    width: auto;
+    min-width: 112px;
+  }
+
+  .topbar .breadcrumb {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+    align-self: center;
+  }
+
+  .topbar > a.topbar-link {
+    grid-column: 2;
+    grid-row: 2;
+    width: auto;
+    min-width: 112px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+}
