@@ -1695,3 +1695,60 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
   .topbar .auth-actions { gap: 4px; }
   .topbar .auth-actions .topbar-link { padding: 0 7px; font-size: 9px; }
 }
+
+
+/* Correctif final mobile : fil d’Ariane au-dessus, actions en dessous. */
+@media (max-width: 760px) {
+  .topbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 12px 16px !important;
+  }
+
+  .topbar .breadcrumb {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100%;
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  .topbar .auth-actions {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .topbar .auth-actions .topbar-link {
+    position: static !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .topbar { padding-right: 12px !important; padding-left: 12px !important; }
+  .topbar .auth-actions { gap: 6px !important; }
+  .topbar .auth-actions .topbar-link { padding: 0 9px !important; font-size: 10px !important; }
+}
