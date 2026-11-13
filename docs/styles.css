@@ -1536,3 +1536,17 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
 .auth-privacy-note[hidden] {
   display: none !important;
 }
+
+
+/* Actions de connexion et d'inscription dans la barre supérieure */
+.auth-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.auth-signup-button { border-color: #42db83; color: #17251d; background: #42db83; }
+.auth-signup-button:hover { border-color: #63e99a; background: #63e99a; }
+.auth-actions [hidden] { display: none !important; }
+@media (max-width: 760px) {
+  .topbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .topbar .breadcrumb { grid-column: 1 / -1; }
+  .topbar .auth-actions { grid-column: 1; grid-row: 2; justify-content: flex-start; }
+  .topbar > a.topbar-link { grid-column: 2; grid-row: 2; width: auto; }
+  .auth-actions .topbar-link { width: auto; min-width: 0; padding: 0 10px; }
+}
