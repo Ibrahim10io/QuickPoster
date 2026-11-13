@@ -1643,3 +1643,55 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
     padding-left: 12px;
   }
 }
+
+/* Correctif mobile : les deux boutons restent côte à côte, distincts d'Accueil. */
+@media (max-width: 760px) {
+  .topbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: minmax(42px, auto) !important;
+    align-items: center;
+    gap: 8px;
+    height: auto !important;
+    min-height: 62px;
+    padding: 9px 14px !important;
+  }
+
+  .topbar .breadcrumb {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .topbar .auth-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    width: auto !important;
+    min-width: 0;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .topbar .auth-actions .topbar-link {
+    position: static !important;
+    display: inline-flex;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 36px;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    padding: 0 9px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .topbar { grid-template-columns: minmax(0, 1fr) auto !important; padding-right: 9px !important; padding-left: 9px !important; }
+  .topbar .breadcrumb { gap: 5px; font-size: 9px; }
+  .topbar .auth-actions { gap: 4px; }
+  .topbar .auth-actions .topbar-link { padding: 0 7px; font-size: 9px; }
+}
