@@ -380,11 +380,35 @@ if (form) {
     saveButton.textContent = activeCreationId ? "Enregistrer les modifications" : "Enregistrer l’affiche";
   };
 
+  const paletteButtons = [...document.querySelectorAll("[data-palette]")];
+
   const setPosterColors = () => {
     poster.style.setProperty("--poster-bg", colorInputs[0].value);
     poster.style.setProperty("--poster-accent", colorInputs[1].value);
     invalidatePosterCanvas();
   };
+
+  paletteButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      colorInputs[0].value = button.dataset.bg;
+      colorInputs[1].value = button.dataset.accent;
+      paletteButtons.forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("is-selected", selected);
+        item.setAttribute("aria-pressed", String(selected));
+      });
+      setPosterColors();
+    });
+  });
+
+  colorInputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      paletteButtons.forEach((button) => {
+        button.classList.remove("is-selected");
+        button.setAttribute("aria-pressed", "false");
+      });
+    });
+  });
 
   const updateTemplateSelection = (template) => {
     poster.className = `poster template-${template}`;
