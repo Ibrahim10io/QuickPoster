@@ -1550,3 +1550,96 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
   .topbar > a.topbar-link { grid-column: 2; grid-row: 2; width: auto; }
   .auth-actions .topbar-link { width: auto; min-width: 0; padding: 0 10px; }
 }
+
+/* Ajustements mobile QUICKPOSTER : barre supérieure et zones tactiles */
+@media (max-width: 760px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    justify-content: stretch;
+    gap: 9px;
+    width: 100%;
+    height: auto;
+    min-height: 82px;
+    padding: 10px 16px;
+  }
+
+  .topbar .breadcrumb {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 7px;
+    font-size: 10px;
+  }
+
+  .topbar .auth-actions {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .topbar .auth-actions .topbar-link {
+    min-height: 40px;
+    padding: 0 13px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .mobile-menu-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .nav-link {
+    min-height: 44px;
+  }
+
+  .page-container {
+    width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .panel,
+  .overview-card,
+  .destination-panel,
+  .creation-card {
+    min-width: 0;
+  }
+
+  .studio-view .poster-stage {
+    min-height: 330px;
+    padding: 12px;
+  }
+
+  .studio-view .poster {
+    max-width: min(100%, 290px);
+  }
+}
+
+@media (max-width: 360px) {
+  .topbar {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .topbar .auth-actions {
+    gap: 6px;
+  }
+
+  .topbar .auth-actions .topbar-link {
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  .page-container {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
