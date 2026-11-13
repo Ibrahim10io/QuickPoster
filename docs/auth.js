@@ -118,13 +118,25 @@
     }
   }
 
-  openButton.addEventListener("click", () => {
-    if (dialog.showModal) dialog.showModal();
-    if (currentUser) {
-      updateAccount(currentUser);
-      activateSettingsTab("profile");
-    } else {
-      emailInput.focus();
+  openButton.addEventListener("click", async () => {
+    openButton.disabled = true;
+    try {
+      // Recharger la session depuis Supabase à chaque ouverture du compte.
+      // Cela évite de réafficher le formulaire si l'état local est en retard.
+      const { data, error } = await client.auth.getSession();
+      if (error) throw error;
+      updateAccount(data?.session?.user || null);
+      if (dialog.showModal) dialog.showModal();
+      if (currentUser) {
+        activateSettingsTab("profile");
+      } else {
+        emailInput.focus();
+      }
+    } catch (error) {
+      if (dialog.showModal) dialog.showModal();
+      showStatus(error.message || "Impossible de vérifier votre connexion.", true);
+    } finally {
+      openButton.disabled = false;
     }
   });
 
