@@ -1,27 +1,32 @@
-(() => {
+( () => {
   const config = {
     url: "https://yhghivyejpavymjcbqnr.supabase.co",
     publishableKey: "sb_publishable_tsG8rK7NjTU6HsMTtVM2qw_-k0MIZAi",
   };
 
-  const dialog = document.querySelector("#auth-dialog");
-  const openButton = document.querySelector("#auth-open-button");
-  const closeButton = document.querySelector("#auth-close-button");
-  const form = document.querySelector("#auth-form");
-  const emailInput = document.querySelector("#auth-email");
-  const passwordInput = document.querySelector("#auth-password");
-  const submitButton = document.querySelector("#auth-submit-button");
-  const modeButton = document.querySelector("#auth-mode-button");
-  const signoutButton = document.querySelector("#auth-signout-button");
-  const status = document.querySelector("#auth-status");
-  const intro = document.querySelector("#auth-intro");
-  const title = document.querySelector("#auth-title");
-  const emailLabel = document.querySelector('label[for="auth-email"]');
-  const passwordLabel = document.querySelector('label[for="auth-password"]');
-  const otpLabel = document.querySelector("#auth-otp-label");
-  const otpInput = document.querySelector("#auth-otp");
-  const resendButton = document.querySelector("#auth-resend-button");
+  const $ = (selector) => document.querySelector(selector);
+  const dialog = $("#auth-dialog");
+  const openButton = $("#auth-open-button");
+  const closeButton = $("#auth-close-button");
+  const form = $("#auth-form");
+  const emailInput = $("#auth-email");
+  const passwordInput = $("#auth-password");
+  const submitButton = $("#auth-submit-button");
+  const modeButton = $("#auth-mode-button");
+  const signoutButton = $("#auth-signout-button");
+  const status = $("#auth-status");
+  const intro = $("#auth-intro");
+  const title = $("#auth-title");
+  const emailLabel = $('label[for="auth-email"]');
+  const passwordLabel = $('label[for="auth-password"]');
+  const otpLabel = $("#auth-otp-label");
+  const otpInput = $("#auth-otp");
+  const resendButton = $("#auth-resend-button");
+  const settings = $("#account-settings");
+  const dialogFooter = $("#auth-dialog-footer");
+  const privacyNote = $("#auth-privacy-note");
   let awaitingSignupCode = false;
+  let currentUser = null;
 
   if (!dialog || !window.supabase?.createClient) {
     if (openButton) openButton.disabled = true;
@@ -30,7 +35,6 @@
 
   const client = window.supabase.createClient(config.url, config.publishableKey);
   let mode = "login";
-  let currentUser = null;
 
   function showStatus(message, isError = false) {
     status.textContent = message;
@@ -62,21 +66,53 @@
     otpInput.hidden = true;
     resendButton.hidden = true;
     otpInput.value = "";
+    form.hidden = false;
+    settings.hidden = true;
+    dialogFooter.hidden = false;
+    privacyNote.hidden = false;
     showStatus("");
+  }
+
+  function activateSettingsTab(tabName) {
+    document.querySelectorAll("[data-settings-tab]").forEach((button) => {
+      const active = button.dataset.settingsTab === tabName;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+    document.querySelectorAll("[data-settings-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.settingsPanel !== tabName;
+    });
+  }
+
+  function populateSettings(user) {
+    const metadata = user.user_metadata || {};
+    $("#profile-first-name").value = metadata.first_name || "";
+    $("#profile-last-name").value = metadata.last_name || "";
+    $("#profile-email").value = user.email || "";
+    $("#privacy-email").textContent = user.email || "Non disponible";
+    $("#privacy-created").textContent = user.created_at
+      ? new Date(user.created_at).toLocaleDateString("fr-FR", { dateStyle: "long" })
+      : "Non disponible";
+    $("#privacy-verified").textContent = user.email_confirmed_at ? "Oui" : "En attente";
+    $("#theme-toggle").checked = localStorage.getItem("quickposter-theme") === "light";
+    $("#email-notifications-toggle").checked = localStorage.getItem("quickposter-email-notifications") === "true";
   }
 
   function updateAccount(user) {
     currentUser = user || null;
     openButton.textContent = currentUser ? "Mon compte · connecté" : "Mon compte";
     modeButton.hidden = Boolean(currentUser);
-    signoutButton.hidden = !currentUser;
     form.hidden = Boolean(currentUser);
+    settings.hidden = !currentUser;
+    dialogFooter.hidden = Boolean(currentUser);
+    privacyNote.hidden = Boolean(currentUser);
     intro.textContent = currentUser
-      ? "Vous êtes connecté à QUICKPOSTER avec votre adresse e-mail."
+      ? "Gérez les informations et les préférences de votre compte."
       : (mode === "signup" ? "Créez un compte avec votre adresse e-mail." : "Connectez-vous pour accéder à votre espace personnel.");
     if (currentUser) {
-      title.textContent = "Votre compte QUICKPOSTER";
-      showStatus(currentUser.email || "Compte connecté.");
+      title.textContent = "Paramètres de votre compte";
+      populateSettings(currentUser);
+      activateSettingsTab("profile");
     } else {
       setMode(mode);
     }
@@ -84,8 +120,12 @@
 
   openButton.addEventListener("click", () => {
     if (dialog.showModal) dialog.showModal();
-    if (currentUser) updateAccount(currentUser);
-    else emailInput.focus();
+    if (currentUser) {
+      updateAccount(currentUser);
+      activateSettingsTab("profile");
+    } else {
+      emailInput.focus();
+    }
   });
 
   closeButton.addEventListener("click", () => dialog.close());
@@ -93,8 +133,10 @@
     if (event.target === dialog) dialog.close();
   });
 
-  modeButton.addEventListener("click", () => {
-    setMode(mode === "login" ? "signup" : "login");
+  modeButton.addEventListener("click", () => setMode(mode === "login" ? "signup" : "login"));
+
+  document.querySelectorAll("[data-settings-tab]").forEach((button) => {
+    button.addEventListener("click", () => activateSettingsTab(button.dataset.settingsTab));
   });
 
   form.addEventListener("submit", async (event) => {
@@ -112,16 +154,13 @@
         const code = otpInput.value.trim();
         if (!/^\d{6}$/.test(code)) throw new Error("Saisissez le code à 6 chiffres reçu par e-mail.");
         showStatus("Vérification du code…");
-        const { data, error } = await client.auth.verifyOtp({ email: emailInput.value.trim(), token: code, type: "signup" });
+        const { data, error } = await client.auth.verifyOtp({ email, token: code, type: "signup" });
         if (error) throw error;
         awaitingSignupCode = false;
         updateAccount(data.user);
         showStatus("Adresse e-mail vérifiée. Vous êtes connecté à QUICKPOSTER.");
         closeAuthDialog();
       } else {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-        if (!email || password.length < 8) throw new Error("Saisissez une adresse e-mail valide et un mot de passe d’au moins 8 caractères.");
         showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
         const result = mode === "signup"
           ? await client.auth.signUp({ email, password })
@@ -160,6 +199,46 @@
     showStatus(error ? (error.message || "Impossible de renvoyer le code.") : "Un nouveau code vient d’être envoyé.");
   });
 
+  $("#profile-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!currentUser) return;
+    const firstName = $("#profile-first-name").value.trim();
+    const lastName = $("#profile-last-name").value.trim();
+    const { data, error } = await client.auth.updateUser({
+      data: { ...(currentUser.user_metadata || {}), first_name: firstName, last_name: lastName, full_name: [firstName, lastName].filter(Boolean).join(" ") }
+    });
+    if (error) return showStatus(error.message || "Impossible d’enregistrer le profil.", true);
+    updateAccount(data.user);
+    activateSettingsTab("profile");
+    showStatus("Profil enregistré.");
+  });
+
+  $("#password-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const nextPassword = $("#new-password").value;
+    const confirmation = $("#confirm-password").value;
+    if (nextPassword.length < 8) return showStatus("Le mot de passe doit contenir au moins 8 caractères.", true);
+    if (nextPassword !== confirmation) return showStatus("Les deux mots de passe ne correspondent pas.", true);
+    const { error } = await client.auth.updateUser({ password: nextPassword });
+    if (error) return showStatus(error.message || "Impossible de modifier le mot de passe.", true);
+    $("#password-form").reset();
+    showStatus("Mot de passe mis à jour.");
+  });
+
+  $("#theme-toggle").addEventListener("change", (event) => {
+    const theme = event.target.checked ? "light" : "dark";
+    localStorage.setItem("quickposter-theme", theme);
+    document.body.dataset.theme = theme;
+    showStatus("Préférence d’apparence enregistrée sur cet appareil.");
+  });
+
+  $("#email-notifications-toggle").addEventListener("change", (event) => {
+    localStorage.setItem("quickposter-email-notifications", String(event.target.checked));
+    showStatus("Préférence enregistrée sur cet appareil. Les e-mails automatiques ne sont pas encore activés.");
+  });
+
+  document.body.dataset.theme = localStorage.getItem("quickposter-theme") || "dark";
+
   signoutButton.addEventListener("click", async () => {
     signoutButton.disabled = true;
     const { error } = await client.auth.signOut();
@@ -182,10 +261,7 @@
       showStatus("Impossible de vérifier la session.", true);
       return;
     }
-    if (data?.session?.user) {
-      updateAccount(data.session.user);
-      showStatus("Compte connecté. Vous pouvez continuer sur cet onglet.");
-    }
+    if (data?.session?.user) updateAccount(data.session.user);
   }
 
   client.auth.getSession().then(({ data, error }) => {
@@ -195,13 +271,9 @@
 
   client.auth.onAuthStateChange((event, session) => {
     updateAccount(session?.user || null);
-    if (event === "SIGNED_IN" && session?.user) {
-      showStatus("Vous êtes connecté à QUICKPOSTER.");
-    }
+    if (event === "SIGNED_IN" && session?.user) showStatus("Vous êtes connecté à QUICKPOSTER.");
   });
 
-  // If email confirmation opens another tab, refresh this original tab
-  // as soon as the user returns to it.
   window.addEventListener("focus", refreshSession);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") refreshSession();
