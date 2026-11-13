@@ -37,6 +37,10 @@
     status.classList.toggle("is-error", isError);
   }
 
+  function closeAuthDialog() {
+    if (dialog.open) dialog.close();
+  }
+
   function setMode(nextMode) {
     mode = nextMode;
     const creating = mode === "signup";
@@ -113,6 +117,7 @@
         awaitingSignupCode = false;
         updateAccount(data.user);
         showStatus("Adresse e-mail vérifiée. Vous êtes connecté à QUICKPOSTER.");
+        closeAuthDialog();
       } else {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
@@ -138,6 +143,7 @@
         } else {
           updateAccount(result.data.user);
           showStatus(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
+          closeAuthDialog();
         }
       }
     } catch (error) {
@@ -167,6 +173,7 @@
     setMode("login");
     updateAccount(null);
     showStatus("Vous êtes déconnecté.");
+    closeAuthDialog();
   });
 
   async function refreshSession() {
