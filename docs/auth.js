@@ -170,6 +170,9 @@
         if (error) throw error;
         awaitingSignupCode = false;
         updateAccount(data.user);
+        emailInput.value = "";
+        passwordInput.value = "";
+        otpInput.value = "";
         showStatus("Adresse e-mail vérifiée. Vous êtes connecté à QUICKPOSTER.");
         closeAuthDialog();
       } else {
@@ -193,6 +196,10 @@
           showStatus("Un code de vérification vient d’être envoyé à " + email + ". Saisissez-le ici pour activer votre compte.");
         } else {
           updateAccount(result.data.user);
+          // Effacer les identifiants du formulaire après une connexion réussie.
+          emailInput.value = "";
+          passwordInput.value = "";
+          otpInput.value = "";
           showStatus(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
           closeAuthDialog();
         }
