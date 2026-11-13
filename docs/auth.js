@@ -189,7 +189,19 @@
         const result = mode === "signup"
           ? await client.auth.signUp({ email, password })
           : await client.auth.signInWithPassword({ email, password });
-        if (result.error) throw result.error;
+        if (result.error) {
+          if (mode === "signup" && /already registered|already exists/i.test(result.error.message || "")) {
+            setMode("login");
+            showStatus("Cette adresse semble déjà associée à un compte. Connectez-vous avec votre mot de passe.", true);
+            return;
+          }
+          throw result.error;
+        }
+        if (mode === "signup" && result.data.user && Array.isArray(result.data.user.identities) && result.data.user.identities.length === 0) {
+          setMode("login");
+          showStatus("Cette adresse possède déjà un compte. Vous avez été redirigé vers Connexion. Saisissez votre mot de passe.", true);
+          return;
+        }
         if (mode === "signup" && !result.data.session) {
           awaitingSignupCode = true;
           emailLabel.hidden = true;
@@ -202,7 +214,7 @@
           otpInput.focus();
           submitButton.textContent = "Vérifier mon adresse e-mail";
           modeButton.hidden = true;
-          showStatus("Un code de vérification vient d’être envoyé à " + email + ". Saisissez-le ici pour activer votre compte.");
+          showStatus("La demande d’inscription a été acceptée. Si l’e-mail de vérification est distribué, vous recevrez un code à " + email + ". Vérifiez aussi les courriers indésirables.");
         } else {
           updateAccount(result.data.user);
           // Effacer les identifiants du formulaire après une connexion réussie.
@@ -224,7 +236,7 @@
     resendButton.disabled = true;
     const { error } = await client.auth.resend({ type: "signup", email: emailInput.value.trim() });
     resendButton.disabled = false;
-    showStatus(error ? (error.message || "Impossible de renvoyer le code.") : "Un nouveau code vient d’être envoyé.");
+    showStatus(error ? (error.message || "Impossible de demander un nouvel envoi.") : "Demande de renvoi acceptée. La réception du message n’est pas encore confirmée.");
   });
 
   $("#profile-form").addEventListener("submit", async (event) => {
