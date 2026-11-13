@@ -1527,3 +1527,12 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
   .account-data-list div { align-items: flex-start; flex-direction: column; gap: 5px; }
   .account-data-list dd { text-align: left; }
 }
+
+
+/* Respecter l'attribut hidden même sur les éléments en display:grid/flex. */
+.auth-form[hidden],
+.account-settings[hidden],
+.auth-dialog-footer[hidden],
+.auth-privacy-note[hidden] {
+  display: none !important;
+}
