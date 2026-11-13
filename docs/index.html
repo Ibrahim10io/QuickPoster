@@ -306,7 +306,7 @@
         </div>
       </main>
     </div>
-    <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-title">
+    <dialog class="auth-dialog account-dialog" id="auth-dialog" aria-labelledby="auth-title">
       <div class="auth-dialog-header">
         <div>
           <p class="eyebrow muted-eyebrow">ESPACE PERSONNEL</p>
@@ -315,6 +315,7 @@
         <button class="auth-close-button" id="auth-close-button" type="button" aria-label="Fermer">×</button>
       </div>
       <p class="auth-intro" id="auth-intro">Connectez-vous ou créez un compte pour retrouver votre espace.</p>
+
       <form id="auth-form" class="auth-form">
         <label for="auth-email">Adresse e-mail</label>
         <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="vous@exemple.fr">
@@ -325,12 +326,86 @@
         <button class="text-link" id="auth-resend-button" type="button" hidden>Renvoyer le code</button>
         <button class="primary-button auth-submit-button" id="auth-submit-button" type="submit">Se connecter</button>
       </form>
+
+      <section class="account-settings" id="account-settings" hidden>
+        <div class="account-tabs" role="tablist" aria-label="Paramètres du compte">
+          <button class="account-tab is-active" type="button" role="tab" aria-selected="true" data-settings-tab="profile">Profil</button>
+          <button class="account-tab" type="button" role="tab" aria-selected="false" data-settings-tab="security">Sécurité</button>
+          <button class="account-tab" type="button" role="tab" aria-selected="false" data-settings-tab="preferences">Préférences</button>
+          <button class="account-tab" type="button" role="tab" aria-selected="false" data-settings-tab="privacy">Confidentialité</button>
+          <button class="account-tab" type="button" role="tab" aria-selected="false" data-settings-tab="session">Session</button>
+        </div>
+
+        <section class="account-panel" data-settings-panel="profile">
+          <h3>Informations du profil</h3>
+          <p class="account-panel-copy">Personnalisez les informations associées à votre compte.</p>
+          <form id="profile-form" class="account-form">
+            <label for="profile-first-name">Prénom</label>
+            <input id="profile-first-name" name="firstName" type="text" maxlength="60" autocomplete="given-name" placeholder="Votre prénom">
+            <label for="profile-last-name">Nom</label>
+            <input id="profile-last-name" name="lastName" type="text" maxlength="60" autocomplete="family-name" placeholder="Votre nom">
+            <label for="profile-email">Adresse e-mail</label>
+            <input id="profile-email" type="email" disabled aria-describedby="profile-email-note">
+            <small id="profile-email-note">L’adresse e-mail ne peut pas être modifiée depuis cette page.</small>
+            <button class="primary-button" type="submit">Enregistrer le profil</button>
+          </form>
+        </section>
+
+        <section class="account-panel" data-settings-panel="security" hidden>
+          <h3>Sécurité du compte</h3>
+          <p class="account-panel-copy">Choisissez un nouveau mot de passe pour votre compte.</p>
+          <form id="password-form" class="account-form">
+            <label for="new-password">Nouveau mot de passe</label>
+            <input id="new-password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required placeholder="8 caractères minimum">
+            <label for="confirm-password">Confirmer le mot de passe</label>
+            <input id="confirm-password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required placeholder="Répétez le mot de passe">
+            <button class="primary-button" type="submit">Mettre à jour le mot de passe</button>
+          </form>
+        </section>
+
+        <section class="account-panel" data-settings-panel="preferences" hidden>
+          <h3>Préférences</h3>
+          <p class="account-panel-copy">Réglez l’apparence et vos préférences d’utilisation.</p>
+          <label class="account-setting-row" for="theme-toggle">
+            <span><strong>Thème clair</strong><small>Utiliser une interface plus lumineuse.</small></span>
+            <input id="theme-toggle" type="checkbox">
+          </label>
+          <label class="account-setting-row" for="email-notifications-toggle">
+            <span><strong>Notifications par e-mail</strong><small>Enregistrer votre préférence pour les futurs e-mails QUICKPOSTER.</small></span>
+            <input id="email-notifications-toggle" type="checkbox">
+          </label>
+          <div class="account-setting-row language-row">
+            <span><strong>Langue</strong><small>Langue actuellement disponible.</small></span>
+            <span class="language-value">Français</span>
+          </div>
+          <p class="account-note">Les préférences d’apparence et de notification sont enregistrées sur cet appareil. Les notifications par e-mail ne sont pas encore activées par le service.</p>
+        </section>
+
+        <section class="account-panel" data-settings-panel="privacy" hidden>
+          <h3>Confidentialité et données</h3>
+          <p class="account-panel-copy">Voici les informations principales associées à votre compte.</p>
+          <dl class="account-data-list">
+            <div><dt>Adresse e-mail</dt><dd id="privacy-email">—</dd></div>
+            <div><dt>Compte créé le</dt><dd id="privacy-created">—</dd></div>
+            <div><dt>Adresse vérifiée</dt><dd id="privacy-verified">—</dd></div>
+          </dl>
+          <p class="account-note">Vos informations de profil sont utilisées pour personnaliser votre espace. Ne partagez jamais votre mot de passe.</p>
+        </section>
+
+        <section class="account-panel" data-settings-panel="session" hidden>
+          <h3>Votre session</h3>
+          <p class="account-panel-copy">Gérez la connexion de cet appareil.</p>
+          <div class="session-status"><span class="session-dot"></span><span>Vous êtes actuellement connecté.</span></div>
+          <p class="account-note">Pour utiliser QUICKPOSTER sur un appareil partagé, pensez à vous déconnecter après votre utilisation.</p>
+          <button class="secondary-button account-signout-button" id="auth-signout-button" type="button">Se déconnecter</button>
+        </section>
+      </section>
+
       <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
-      <div class="auth-dialog-footer">
+      <div class="auth-dialog-footer" id="auth-dialog-footer">
         <button class="text-link auth-mode-button" id="auth-mode-button" type="button">Créer un compte</button>
-        <button class="text-link auth-signout-button" id="auth-signout-button" type="button" hidden>Se déconnecter</button>
       </div>
-      <p class="auth-privacy-note">Ne partagez jamais votre mot de passe. La création d’un compte sera ouverte au public après vérification des règles de confidentialité et de protection des données.</p>
+      <p class="auth-privacy-note" id="auth-privacy-note">Ne partagez jamais votre mot de passe. La création d’un compte sera ouverte au public après vérification des règles de confidentialité et de protection des données.</p>
     </dialog>
   </body>
 </html>
