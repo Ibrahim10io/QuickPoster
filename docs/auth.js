@@ -7,6 +7,8 @@
   const $ = (selector) => document.querySelector(selector);
   const dialog = $("#auth-dialog");
   const openButton = $("#auth-open-button");
+  const loginButton = $("#auth-login-button");
+  const signupButton = $("#auth-signup-button");
   const closeButton = $("#auth-close-button");
   const form = $("#auth-form");
   const emailInput = $("#auth-email");
@@ -100,7 +102,10 @@
 
   function updateAccount(user) {
     currentUser = user || null;
-    openButton.textContent = currentUser ? "Mon compte · connecté" : "Mon compte";
+    openButton.hidden = !currentUser;
+    if (loginButton) loginButton.hidden = Boolean(currentUser);
+    if (signupButton) signupButton.hidden = Boolean(currentUser);
+    openButton.textContent = "Mon compte";
     modeButton.hidden = Boolean(currentUser);
     form.hidden = Boolean(currentUser);
     settings.hidden = !currentUser;
@@ -118,11 +123,10 @@
     }
   }
 
-  openButton.addEventListener("click", async () => {
-    openButton.disabled = true;
+  async function openAccountDialog(startMode = "login") {
+    const trigger = startMode === "signup" ? signupButton : loginButton || openButton;
+    if (trigger) trigger.disabled = true;
     try {
-      // Recharger la session depuis Supabase à chaque ouverture du compte.
-      // Cela évite de réafficher le formulaire si l'état local est en retard.
       const { data, error } = await client.auth.getSession();
       if (error) throw error;
       updateAccount(data?.session?.user || null);
@@ -130,15 +134,20 @@
       if (currentUser) {
         activateSettingsTab("profile");
       } else {
+        setMode(startMode);
         emailInput.focus();
       }
     } catch (error) {
       if (dialog.showModal) dialog.showModal();
       showStatus(error.message || "Impossible de vérifier votre connexion.", true);
     } finally {
-      openButton.disabled = false;
+      if (trigger) trigger.disabled = false;
     }
-  });
+  }
+
+  openButton.addEventListener("click", () => openAccountDialog("login"));
+  if (loginButton) loginButton.addEventListener("click", () => openAccountDialog("login"));
+  if (signupButton) signupButton.addEventListener("click", () => openAccountDialog("signup"));
 
   closeButton.addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (event) => {
