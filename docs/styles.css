@@ -1752,3 +1752,25 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
   .topbar .auth-actions { gap: 6px !important; }
   .topbar .auth-actions .topbar-link { padding: 0 9px !important; font-size: 10px !important; }
 }
+
+
+/* Inscription enrichie et méthodes de création */
+.auth-form .signup-extra[hidden],
+.auth-form [hidden] { display: none !important; }
+.auth-form .signup-extra { display: grid; gap: 8px; }
+.auth-form .signup-extra small { color: #aebfc0; font-size: 10px; line-height: 1.45; }
+.creation-methods { margin: 0 0 22px; }
+.method-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.method-card { display: grid; gap: 8px; min-width: 0; min-height: 132px; padding: 14px; border: 1px solid rgba(155,184,178,.18); border-radius: 13px; color: #e8f1ed; background: rgba(10,18,22,.25); text-align: left; font: inherit; cursor: pointer; }
+.method-card:hover, .method-card.is-selected { border-color: rgba(98,230,160,.7); background: rgba(98,230,160,.08); }
+.method-symbol { color: #62e6a0; font-size: 22px; }
+.method-card strong { font-size: 12px; line-height: 1.3; }
+.method-card small, .method-help, #assist-method-copy { color: #aebfc0; font-size: 10px; line-height: 1.5; }
+.method-panel { margin-top: 12px; padding: 14px; border: 1px solid rgba(155,184,178,.17); border-radius: 12px; background: rgba(10,18,22,.22); }
+.method-panel[hidden] { display: none !important; }
+.method-panel label { display: block; margin-bottom: 8px; color: #e8f1ed; font-size: 11px; font-weight: 650; }
+.method-panel input[type="file"] { max-width: 100%; color: #dce7e3; font: inherit; font-size: 11px; }
+.method-help { margin: 8px 0 0; }
+.user-poster-photo { display: block; width: 100%; max-height: 170px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+@media (max-width: 760px) { .method-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 380px) { .method-grid { grid-template-columns: minmax(0, 1fr); } .method-card { min-height: 100px; } }
