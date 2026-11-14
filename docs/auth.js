@@ -13,6 +13,12 @@
   const form = $("#auth-form");
   const emailInput = $("#auth-email");
   const passwordInput = $("#auth-password");
+  const signupExtra = $("#signup-extra");
+  const firstNameInput = $("#auth-first-name");
+  const lastNameInput = $("#auth-last-name");
+  const usernameInput = $("#auth-username");
+  const businessInput = $("#auth-business");
+  const passwordConfirmInput = $("#auth-password-confirm");
   const submitButton = $("#auth-submit-button");
   const modeButton = $("#auth-mode-button");
   const signoutButton = $("#auth-signout-button");
@@ -57,6 +63,16 @@
     submitButton.textContent = creating ? "Créer mon compte" : "Se connecter";
     modeButton.textContent = creating ? "J’ai déjà un compte" : "Créer un compte";
     passwordInput.autocomplete = creating ? "new-password" : "current-password";
+    signupExtra.hidden = !creating;
+    firstNameInput.required = creating;
+    lastNameInput.required = creating;
+    usernameInput.required = creating;
+    passwordConfirmInput.required = creating;
+    passwordConfirmInput.hidden = !creating;
+    signupExtra.querySelectorAll("label, input, small").forEach((element) => {
+      if (element.id !== "auth-password-confirm" && element.htmlFor !== "auth-password-confirm") return;
+      element.hidden = !creating;
+    });
     awaitingSignupCode = false;
     emailInput.disabled = false;
     passwordInput.disabled = false;
@@ -169,6 +185,21 @@
       return;
     }
 
+    if (mode === "signup" && !awaitingSignupCode) {
+      if (!firstNameInput.value.trim() || !lastNameInput.value.trim() || !usernameInput.value.trim()) {
+        showStatus("Renseignez votre prénom, votre nom et votre nom d’utilisateur.", true);
+        return;
+      }
+      if (!usernameInput.checkValidity()) {
+        showStatus("Le nom d’utilisateur doit contenir 3 à 24 caractères autorisés.", true);
+        return;
+      }
+      if (password !== passwordConfirmInput.value) {
+        showStatus("Les deux mots de passe ne correspondent pas.", true);
+        return;
+      }
+    }
+
     submitButton.disabled = true;
     try {
       if (awaitingSignupCode) {
@@ -187,7 +218,7 @@
       } else {
         showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
         const result = mode === "signup"
-          ? await client.auth.signUp({ email, password })
+          ? await client.auth.signUp({ email, password, options: { data: { first_name: firstNameInput.value.trim(), last_name: lastNameInput.value.trim(), username: usernameInput.value.trim(), business_name: businessInput.value.trim() } } })
           : await client.auth.signInWithPassword({ email, password });
         if (result.error) {
           if (mode === "signup" && /already registered|already exists/i.test(result.error.message || "")) {
