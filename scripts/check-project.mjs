@@ -7,7 +7,7 @@ const app = readFileSync("docs/app.js", "utf8");
 
 const checks = [
   ["Supabase client uses the intended project", auth.includes("https://yhghivyejpavymjcbqnr.supabase.co")],
-  ["Signup sends an email verification code", auth.includes("client.auth.signUp({ email, password })")],
+  ["Signup sends an email verification code", auth.includes("client.auth.signUp({ email, password, options: { data:")],
   ["Email verification code is checked with Supabase", auth.includes('type: "signup"') && auth.includes("client.auth.verifyOtp(")],
   ["Users can request another verification code", auth.includes('client.auth.resend({ type: "signup"')],
   ["Signup uses Supabase email/password authentication", /client\.auth\.signUp\(/.test(auth)],
