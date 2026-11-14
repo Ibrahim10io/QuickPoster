@@ -140,6 +140,25 @@
               </div>
             </section>
 
+            <section class="creation-methods" aria-label="Choisir une méthode de création">
+              <p class="section-kicker">CHOISISSEZ VOTRE MÉTHODE</p>
+              <div class="method-grid">
+                <button class="method-card is-selected" type="button" data-creation-mode="templates" aria-pressed="true"><span class="method-symbol">▦</span><strong>Modèles prêts à l'emploi</strong><small>Partez d'un design et personnalisez-le.</small></button>
+                <button class="method-card" type="button" data-creation-mode="free" aria-pressed="false"><span class="method-symbol">✎</span><strong>Création libre</strong><small>Composez votre affiche et modifiez les textes directement.</small></button>
+                <button class="method-card" type="button" data-creation-mode="photo" aria-pressed="false"><span class="method-symbol">▧</span><strong>À partir d'une photo</strong><small>Ajoutez votre image à votre composition.</small></button>
+                <button class="method-card" type="button" data-creation-mode="assist" aria-pressed="false"><span class="method-symbol">✦</span><strong>Assistant de rédaction</strong><small>Obtenez une proposition de texte à personnaliser.</small></button>
+              </div>
+              <div class="method-panel" id="photo-method-panel" hidden>
+                <label for="poster-photo">Choisir une photo depuis votre appareil</label>
+                <input id="poster-photo" type="file" accept="image/png,image/jpeg,image/webp">
+                <p class="method-help">L'image est utilisée dans l'aperçu de cette session. Évite les photos contenant des informations personnelles.</p>
+              </div>
+              <div class="method-panel" id="assist-method-panel" hidden>
+                <p id="assist-method-copy">Renseignez le nom de votre activité et le produit à promouvoir, puis appuyez sur « Proposer un texte ».</p>
+                <button class="secondary-button" id="suggest-poster-copy" type="button">Proposer un texte</button>
+              </div>
+            </section>
+
             <div class="workspace">
               <section class="form-panel panel" aria-labelledby="form-title">
                 <div class="panel-heading">
@@ -317,6 +336,19 @@
       <p class="auth-intro" id="auth-intro">Connectez-vous ou créez un compte pour retrouver votre espace.</p>
 
       <form id="auth-form" class="auth-form">
+        <div class="signup-extra" id="signup-extra" hidden>
+          <label for="auth-first-name">Prénom</label>
+          <input id="auth-first-name" name="firstName" type="text" autocomplete="given-name" maxlength="60" placeholder="Votre prénom">
+          <label for="auth-last-name">Nom</label>
+          <input id="auth-last-name" name="lastName" type="text" autocomplete="family-name" maxlength="60" placeholder="Votre nom">
+          <label for="auth-username">Nom d'utilisateur</label>
+          <input id="auth-username" name="username" type="text" autocomplete="nickname" minlength="3" maxlength="24" pattern="[A-Za-z0-9._-]{3,24}" placeholder="Ex. ibrahim_01">
+          <small>3 à 24 caractères : lettres, chiffres, point, tiret ou tiret bas.</small>
+          <label for="auth-business">Nom de l'entreprise <span class="optional-label">Facultatif</span></label>
+          <input id="auth-business" name="businessName" type="text" autocomplete="organization" maxlength="100" placeholder="Le nom de votre activité">
+          <label for="auth-password-confirm">Confirmer le mot de passe</label>
+          <input id="auth-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="Retapez votre mot de passe">
+        </div>
         <label for="auth-email">Adresse e-mail</label>
         <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="vous@exemple.fr">
         <label for="auth-password">Mot de passe</label>
