@@ -422,25 +422,87 @@ if (form) {
       poster.prepend(photo);
     }
     photo.src = selectedPhotoUrl;
+    photo.style.left = "8%";
+    photo.style.top = "8%";
+    photo.style.width = "44%";
+    photo.style.height = "auto";
+    photo.style.maxHeight = "34%";
+    photo.style.position = "absolute";
+    photo.style.zIndex = "5";
     poster.hidden = false;
     emptyPreview.hidden = true;
     invalidatePosterCanvas();
-    statusMessage.textContent = "Photo ajoutée à l’aperçu. Générer ou télécharger l’affiche pour vérifier le résultat.";
+    statusMessage.textContent = "Photo ajoutée. Faites-la glisser directement sur l’affiche pour la placer où vous voulez.";
   });
 
+  let draggedPhoto = null;
+  let photoDragOrigin = null;
+  poster.addEventListener("pointerdown", (event) => {
+    const photo = event.target.closest(".user-poster-photo");
+    if (!photo) return;
+    event.preventDefault();
+    draggedPhoto = photo;
+    const posterRect = poster.getBoundingClientRect();
+    const photoRect = photo.getBoundingClientRect();
+    photoDragOrigin = {
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      left: (photoRect.left - posterRect.left) / posterRect.width * 100,
+      top: (photoRect.top - posterRect.top) / posterRect.height * 100
+    };
+    photo.setPointerCapture(event.pointerId);
+    photo.style.cursor = "grabbing";
+  });
+  poster.addEventListener("pointermove", (event) => {
+    if (!draggedPhoto || !photoDragOrigin) return;
+    const rect = poster.getBoundingClientRect();
+    const left = photoDragOrigin.left + (event.clientX - photoDragOrigin.pointerX) / rect.width * 100;
+    const top = photoDragOrigin.top + (event.clientY - photoDragOrigin.pointerY) / rect.height * 100;
+    const maxLeft = 100 - draggedPhoto.offsetWidth / rect.width * 100;
+    const maxTop = 100 - draggedPhoto.offsetHeight / rect.height * 100;
+    draggedPhoto.style.left = `${Math.max(0, Math.min(maxLeft, left))}%`;
+    draggedPhoto.style.top = `${Math.max(0, Math.min(maxTop, top))}%`;
+    invalidatePosterCanvas();
+  });
+  const finishPhotoDrag = () => {
+    if (draggedPhoto) draggedPhoto.style.cursor = "grab";
+    draggedPhoto = null;
+    photoDragOrigin = null;
+  };
+  poster.addEventListener("pointerup", finishPhotoDrag);
+  poster.addEventListener("pointercancel", finishPhotoDrag);
+
+  const assistantText = document.querySelector("#assist-poster-text");
   document.querySelector("#suggest-poster-copy").addEventListener("click", () => {
     const business = document.querySelector("#business-name").value.trim();
     const type = document.querySelector("#business-type").value.trim();
     const product = document.querySelector("#product").value.trim();
     if (!business || !type || !product) {
-      statusMessage.textContent = "Renseignez d’abord le nom, le type de commerce et le produit à promouvoir.";
+      statusMessage.textContent = "Renseignez le nom, le type de commerce et le produit pour obtenir une proposition, ou écrivez directement votre texte.";
+      assistantText.focus();
       return;
     }
-    const suggestion = `Découvrez chez ${business} : ${product} ! Une sélection pensée pour vous, dans votre ${type.toLowerCase()}. Venez nous rendre visite et trouvez votre prochain coup de cœur.`;
-    document.querySelector("#promotion").value = suggestion;
-    document.querySelector("#promotion").dispatchEvent(new Event("input", { bubbles: true }));
-    document.querySelector("#assist-method-copy").textContent = "Proposition ajoutée au champ « Texte promotionnel ». Vous pouvez la modifier librement.";
-    statusMessage.textContent = "Proposition de texte créée à partir de vos informations. Elle n’utilise pas de service d’IA externe.";
+    assistantText.value = `Découvrez chez ${business} : ${product} ! Une sélection pensée pour vous, dans votre ${type.toLowerCase()}. Venez nous rendre visite et trouvez votre prochain coup de cœur.`;
+    document.querySelector("#assist-method-copy").textContent = "Vous pouvez modifier la proposition avant de l’ajouter à l’affiche.";
+    statusMessage.textContent = "Proposition prête. Modifiez-la si besoin, puis appuyez sur « Ajouter à l’affiche ».";
+  });
+  document.querySelector("#apply-poster-copy").addEventListener("click", () => {
+    const text = assistantText.value.trim();
+    if (!text) {
+      statusMessage.textContent = "Écrivez un texte avant de l’ajouter à l’affiche.";
+      assistantText.focus();
+      return;
+    }
+    document.querySelector("#promotion").value = text;
+    setPosterText("promotion", text);
+    poster.hidden = false;
+    emptyPreview.hidden = true;
+    invalidatePosterCanvas();
+    saveButton.disabled = false;
+    downloadButton.disabled = false;
+    downloadPdfButton.disabled = false;
+    document.querySelector("#assist-method-copy").textContent = "Votre texte est ajouté. Vous pouvez le modifier ici ou directement sur l’affiche.";
+    statusMessage.textContent = "Texte ajouté à l’affiche. Vous pouvez maintenant le modifier dans l’aperçu.";
   });
 
   const paletteButtons = [...document.querySelectorAll("[data-palette]")];
