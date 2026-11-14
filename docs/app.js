@@ -380,6 +380,69 @@ if (form) {
     saveButton.textContent = activeCreationId ? "Enregistrer les modifications" : "Enregistrer l’affiche";
   };
 
+  const creationModeButtons = [...document.querySelectorAll("[data-creation-mode]")];
+  const photoMethodPanel = document.querySelector("#photo-method-panel");
+  const assistMethodPanel = document.querySelector("#assist-method-panel");
+  const posterPhotoInput = document.querySelector("#poster-photo");
+  let selectedPhotoUrl = null;
+
+  creationModeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      creationModeButtons.forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-selected", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      const mode = button.dataset.creationMode;
+      photoMethodPanel.hidden = mode !== "photo";
+      assistMethodPanel.hidden = mode !== "assist";
+      if (mode === "free") {
+        statusMessage.textContent = "Mode libre : choisissez vos couleurs et modifiez directement les textes dans l’aperçu.";
+      } else if (mode === "templates") {
+        statusMessage.textContent = "Choisissez un modèle dans la zone d’aperçu.";
+      }
+    });
+  });
+
+  posterPhotoInput.addEventListener("change", () => {
+    const file = posterPhotoInput.files?.[0];
+    if (!file) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
+      posterPhotoInput.value = "";
+      statusMessage.textContent = "Choisissez une image PNG, JPG ou WebP de 5 Mo maximum.";
+      return;
+    }
+    if (selectedPhotoUrl) URL.revokeObjectURL(selectedPhotoUrl);
+    selectedPhotoUrl = URL.createObjectURL(file);
+    let photo = poster.querySelector(".user-poster-photo");
+    if (!photo) {
+      photo = document.createElement("img");
+      photo.className = "user-poster-photo";
+      photo.alt = "Photo ajoutée à l’affiche";
+      poster.prepend(photo);
+    }
+    photo.src = selectedPhotoUrl;
+    poster.hidden = false;
+    emptyPreview.hidden = true;
+    invalidatePosterCanvas();
+    statusMessage.textContent = "Photo ajoutée à l’aperçu. Générer ou télécharger l’affiche pour vérifier le résultat.";
+  });
+
+  document.querySelector("#suggest-poster-copy").addEventListener("click", () => {
+    const business = document.querySelector("#business-name").value.trim();
+    const type = document.querySelector("#business-type").value.trim();
+    const product = document.querySelector("#product").value.trim();
+    if (!business || !type || !product) {
+      statusMessage.textContent = "Renseignez d’abord le nom, le type de commerce et le produit à promouvoir.";
+      return;
+    }
+    const suggestion = `Découvrez chez ${business} : ${product} ! Une sélection pensée pour vous, dans votre ${type.toLowerCase()}. Venez nous rendre visite et trouvez votre prochain coup de cœur.`;
+    document.querySelector("#promotion").value = suggestion;
+    document.querySelector("#promotion").dispatchEvent(new Event("input", { bubbles: true }));
+    document.querySelector("#assist-method-copy").textContent = "Proposition ajoutée au champ « Texte promotionnel ». Vous pouvez la modifier librement.";
+    statusMessage.textContent = "Proposition de texte créée à partir de vos informations. Elle n’utilise pas de service d’IA externe.";
+  });
+
   const paletteButtons = [...document.querySelectorAll("[data-palette]")];
 
   const setPosterColors = () => {
