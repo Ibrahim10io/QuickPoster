@@ -396,6 +396,7 @@ if (form) {
       const mode = button.dataset.creationMode;
       photoMethodPanel.hidden = mode !== "photo";
       assistMethodPanel.hidden = mode !== "assist";
+      document.querySelector(".studio-view")?.classList.toggle("assistant-mode", mode === "assist");
       if (mode === "free") {
         statusMessage.textContent = "Mode libre : choisissez vos couleurs et modifiez directement les textes dans l’aperçu.";
       } else if (mode === "templates") {
