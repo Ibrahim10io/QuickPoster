@@ -473,30 +473,38 @@ if (form) {
   poster.addEventListener("pointercancel", finishPhotoDrag);
 
   const assistantText = document.querySelector("#assist-poster-text");
-  let assistantVersion = 0;
+  const studioView = document.querySelector(".studio-view");
+  const assistantFeedback = document.querySelector("#assist-method-copy");
   document.querySelector("#suggest-poster-copy").addEventListener("click", () => {
-    const value = (selector) => document.querySelector(selector)?.value?.trim() || "";
-    const business = value("#business-name");
-    const type = value("#business-type");
-    const description = value("#business-description");
-    const product = value("#product");
-    const promotion = value("#promotion");
-    const price = value("#price");
-    const contact = value("#contact");
-    if (!business || !type || !product) {
-      statusMessage.textContent = "Renseignez le nom, le type de commerce et le produit ou service pour créer une proposition.";
+    const idea = assistantText.value.trim();
+    if (idea.length < 12) {
+      assistantFeedback.textContent = "Décrivez votre idée en quelques mots pour que je puisse préparer l’affiche.";
       assistantText.focus();
       return;
     }
-    const versions = [
-      [business.toUpperCase(), product, description || "Découvrez notre offre et profitez d’un accueil attentif.", promotion ? "OFFRE : " + promotion : "", price ? "Prix : " + price : "", contact ? "Renseignements : " + contact : "", "Contactez-nous ou rendez-nous visite."],
-      ["À DÉCOUVRIR CHEZ " + business, product, description || "Une offre à découvrir dans votre commerce de proximité.", promotion ? "En ce moment : " + promotion : "", price ? "À partir de " + price : "", contact ? "Pour nous joindre : " + contact : "", "Nous serons ravis de vous accueillir."],
-      [business + " | " + type, "Faites-vous plaisir avec " + product + ".", description, promotion ? "Profitez de notre offre : " + promotion : "", price ? "Tarif : " + price : "", contact ? "Contact : " + contact : "", "Passez nous voir dès aujourd’hui !"]
-    ];
-    assistantText.value = versions[assistantVersion % versions.length].filter(Boolean).join("\n");
-    assistantVersion += 1;
-    document.querySelector("#assist-method-copy").textContent = "Proposition créée instantanément sur votre appareil. Vous pouvez modifier chaque ligne avant de l’ajouter à l’affiche.";
-    statusMessage.textContent = "Votre proposition est prête. Cliquez de nouveau sur « Proposer un texte » pour une autre version.";
+    const setValue = (selector, value) => { const field = document.querySelector(selector); if (field) field.value = value; };
+    const lower = idea.toLowerCase();
+    const businessType = /coiff|cheveu|barbier|salon/.test(lower) ? "Salon de coiffure" : /restaurant|pizza|burger|café|boulanger|pâtiss/.test(lower) ? "Restauration" : /fleur|plante|bouquet/.test(lower) ? "Fleuriste" : /vetement|vêtement|mode|boutique/.test(lower) ? "Boutique" : "Commerce";
+    const promoMatch = idea.match(/(?:promo(?:tion)?|offre|réduction|remise)\s*[:：-]?\s*([^.!?\n]+)/i);
+    const priceMatch = idea.match(/\b\d+(?:[,.]\d{1,2})?\s*€/);
+    const nameMatch = idea.match(/(?:pour|chez)\s+(?:mon|ma|le|la|l[’\x27])?\s*([A-ZÀ-ÖØ-Þ][\wÀ-ÿ’\x27-]*(?:\s+[A-ZÀ-ÖØ-Þ][\wÀ-ÿ’\x27-]*){0,2})/);
+    const title = promoMatch ? promoMatch[1].trim() : idea.split(/[.!?\n]/)[0].trim();
+    setValue("#business-name", nameMatch ? nameMatch[1] : "Mon commerce");
+    setValue("#business-type", businessType);
+    setValue("#business-description", idea);
+    setValue("#product", title.slice(0, 90) || "Notre offre");
+    setValue("#promotion", promoMatch ? promoMatch[1].trim() : "Découvrez notre offre");
+    setValue("#price", priceMatch ? priceMatch[0] : "");
+    setValue("#contact", "");
+    const palette = /noir|doré|dore|or\b/.test(lower) ? "mono" : /rose|pink/.test(lower) ? "berry" : /bleu|mer|océan/.test(lower) ? "ocean" : /violet|lavande/.test(lower) ? "lavender" : /orange|soleil|été|ete/.test(lower) ? "sunset" : "nature";
+    const paletteButton = document.querySelector(`[data-palette="${palette}"]`);
+    if (paletteButton) paletteButton.click();
+    updateRequiredValidity();
+    if (!form.reportValidity()) { assistantFeedback.textContent = "Ajoutez un peu plus de détails à votre idée."; return; }
+    form.requestSubmit();
+    assistantFeedback.textContent = "Votre affiche est prête dans l’aperçu. Vous pouvez encore modifier les informations et le modèle."; 
+    statusMessage.textContent = "Affiche créée à partir de votre idée. Personnalisez-la ou téléchargez-la."; 
+    document.querySelector("#preview-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   document.querySelector("#apply-poster-copy").addEventListener("click", () => {
     const text = assistantText.value.trim();
