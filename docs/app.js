@@ -383,6 +383,8 @@ if (form) {
   const creationModeButtons = [...document.querySelectorAll("[data-creation-mode]")];
   const photoMethodPanel = document.querySelector("#photo-method-panel");
   const assistMethodPanel = document.querySelector("#assist-method-panel");
+  const infoPanel = document.querySelector(".assistant-hidden-form");
+  if (infoPanel) infoPanel.hidden = false;
   const posterPhotoInput = document.querySelector("#poster-photo");
   let selectedPhotoUrl = null;
 
@@ -396,6 +398,7 @@ if (form) {
       const mode = button.dataset.creationMode;
       photoMethodPanel.hidden = mode !== "photo";
       assistMethodPanel.hidden = mode !== "assist";
+      if (infoPanel) infoPanel.hidden = mode === "assist";
       document.querySelector(".studio-view")?.classList.toggle("assistant-mode", mode === "assist");
       if (mode === "free") {
         statusMessage.textContent = "Mode libre : choisissez vos couleurs et modifiez directement les textes dans l’aperçu.";
@@ -507,25 +510,6 @@ if (form) {
     statusMessage.textContent = "Affiche créée à partir de votre idée. Personnalisez-la ou téléchargez-la."; 
     document.querySelector("#preview-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  document.querySelector("#apply-poster-copy").addEventListener("click", () => {
-    const text = assistantText.value.trim();
-    if (!text) {
-      statusMessage.textContent = "Écrivez un texte avant de l’ajouter à l’affiche.";
-      assistantText.focus();
-      return;
-    }
-    document.querySelector("#promotion").value = text;
-    setPosterText("promotion", text);
-    poster.hidden = false;
-    emptyPreview.hidden = true;
-    invalidatePosterCanvas();
-    saveButton.disabled = false;
-    downloadButton.disabled = false;
-    downloadPdfButton.disabled = false;
-    document.querySelector("#assist-method-copy").textContent = "Votre texte est ajouté. Vous pouvez le modifier ici ou directement sur l’affiche.";
-    statusMessage.textContent = "Texte ajouté à l’affiche. Vous pouvez maintenant le modifier dans l’aperçu.";
-  });
-
   const paletteButtons = [...document.querySelectorAll("[data-palette]")];
 
   const setPosterColors = () => {
