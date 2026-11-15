@@ -473,18 +473,30 @@ if (form) {
   poster.addEventListener("pointercancel", finishPhotoDrag);
 
   const assistantText = document.querySelector("#assist-poster-text");
+  let assistantVersion = 0;
   document.querySelector("#suggest-poster-copy").addEventListener("click", () => {
-    const business = document.querySelector("#business-name").value.trim();
-    const type = document.querySelector("#business-type").value.trim();
-    const product = document.querySelector("#product").value.trim();
+    const value = (selector) => document.querySelector(selector)?.value?.trim() || "";
+    const business = value("#business-name");
+    const type = value("#business-type");
+    const description = value("#business-description");
+    const product = value("#product");
+    const promotion = value("#promotion");
+    const price = value("#price");
+    const contact = value("#contact");
     if (!business || !type || !product) {
-      statusMessage.textContent = "Renseignez le nom, le type de commerce et le produit pour obtenir une proposition, ou écrivez directement votre texte.";
+      statusMessage.textContent = "Renseignez le nom, le type de commerce et le produit ou service pour créer une proposition.";
       assistantText.focus();
       return;
     }
-    assistantText.value = `Découvrez chez ${business} : ${product} ! Une sélection pensée pour vous, dans votre ${type.toLowerCase()}. Venez nous rendre visite et trouvez votre prochain coup de cœur.`;
-    document.querySelector("#assist-method-copy").textContent = "Vous pouvez modifier la proposition avant de l’ajouter à l’affiche.";
-    statusMessage.textContent = "Proposition prête. Modifiez-la si besoin, puis appuyez sur « Ajouter à l’affiche ».";
+    const versions = [
+      [business.toUpperCase(), product, description || "Découvrez notre offre et profitez d’un accueil attentif.", promotion ? "OFFRE : " + promotion : "", price ? "Prix : " + price : "", contact ? "Renseignements : " + contact : "", "Contactez-nous ou rendez-nous visite."],
+      ["À DÉCOUVRIR CHEZ " + business, product, description || "Une offre à découvrir dans votre commerce de proximité.", promotion ? "En ce moment : " + promotion : "", price ? "À partir de " + price : "", contact ? "Pour nous joindre : " + contact : "", "Nous serons ravis de vous accueillir."],
+      [business + " | " + type, "Faites-vous plaisir avec " + product + ".", description, promotion ? "Profitez de notre offre : " + promotion : "", price ? "Tarif : " + price : "", contact ? "Contact : " + contact : "", "Passez nous voir dès aujourd’hui !"]
+    ];
+    assistantText.value = versions[assistantVersion % versions.length].filter(Boolean).join("\n");
+    assistantVersion += 1;
+    document.querySelector("#assist-method-copy").textContent = "Proposition créée instantanément sur votre appareil. Vous pouvez modifier chaque ligne avant de l’ajouter à l’affiche.";
+    statusMessage.textContent = "Votre proposition est prête. Cliquez de nouveau sur « Proposer un texte » pour une autre version.";
   });
   document.querySelector("#apply-poster-copy").addEventListener("click", () => {
     const text = assistantText.value.trim();
