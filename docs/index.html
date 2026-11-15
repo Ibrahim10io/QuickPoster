@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="styles.css?v=local-ai-check-1">
     <script src="vendor/html2canvas.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
-    <script src="app.js?v=assistant-copy-3" defer></script>
+    <script src="app.js?v=assistant-flow-4" defer></script>
     <script src="auth.js" defer></script>
   </head>
   <body>
@@ -154,12 +154,18 @@
                 <p class="method-help">L'image est utilisée dans l'aperçu de cette session. Évite les photos contenant des informations personnelles.</p>
               </div>
               <div class="method-panel" id="assist-method-panel" hidden>
-                <p id="assist-method-copy">Écrivez votre texte ou demandez une proposition, puis ajoutez-le à votre affiche.</p>
-                <label for="assist-poster-text">Votre texte</label>
-                <textarea id="assist-poster-text" rows="4" placeholder="Ex. Découvrez notre nouvelle collection !"></textarea>
-                <div class="assist-actions">
-                  <button class="secondary-button" id="suggest-poster-copy" type="button">Proposer un texte</button>
-                  <button class="primary-button" id="apply-poster-copy" type="button">Ajouter à l’affiche</button>
+                <div class="assistant-composer">
+                  <div class="assistant-composer-top">
+                    <span class="assistant-avatar" aria-hidden="true">✦</span>
+                    <div><strong>Créons votre affiche ensemble</strong><p>Décrivez simplement votre idée. QUICKPOSTER prépare la mise en page et le contenu.</p></div>
+                  </div>
+                  <label for="assist-poster-text">Quelle affiche voulez-vous créer ?</label>
+                  <textarea id="assist-poster-text" rows="5" placeholder="Ex. Je veux une affiche élégante pour mon salon de coiffure. Promo : -20 % sur les brushings jusqu’à la fin du mois. Couleurs noir et doré."></textarea>
+                  <div class="assistant-composer-footer">
+                    <span>Pas besoin de remplir les autres champs.</span>
+                    <button class="primary-button" id="suggest-poster-copy" type="button">Créer mon affiche <span aria-hidden="true">✦</span></button>
+                  </div>
+                  <p id="assist-method-copy" class="assistant-feedback" aria-live="polite">Votre aperçu apparaîtra à droite après la création.</p>
                 </div>
 
               </div>
