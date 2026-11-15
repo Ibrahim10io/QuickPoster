@@ -11,7 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
     <script src="app.js?v=photo-assistant-2" defer></script>
     <script src="auth.js" defer></script>
-    <script src="assistant-check.js?v=local-ai-check-1" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -162,19 +161,7 @@
                   <button class="secondary-button" id="suggest-poster-copy" type="button">Proposer un texte</button>
                   <button class="primary-button" id="apply-poster-copy" type="button">Ajouter à l’affiche</button>
                 </div>
-                <section class="ai-compat-card" aria-labelledby="ai-compat-title">
-                  <div class="ai-compat-heading">
-                    <span class="ai-compat-icon" aria-hidden="true">✦</span>
-                    <div><strong id="ai-compat-title">Assistant IA local</strong><small>Sans abonnement, sans clé API et sans frais</small></div>
-                  </div>
-                  <p class="ai-compat-copy">On vérifie d’abord si votre appareil peut faire fonctionner l’IA. Aucun modèle n’est téléchargé pendant ce premier test.</p>
-                  <div class="ai-compat-actions">
-                    <button class="secondary-button" id="ai-check-device" type="button">Tester mon appareil</button>
-                    <button class="primary-button" id="ai-load-model" type="button" disabled>Tester le modèle IA (~1 Go)</button>
-                  </div>
-                  <p id="ai-compat-status" class="ai-compat-status" role="status" aria-live="polite">En attente du test de compatibilité.</p>
-                  <div id="ai-compat-details" class="ai-compat-details" hidden></div>
-                </section>
+
               </div>
             </section>
 
