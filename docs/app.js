@@ -479,36 +479,63 @@ if (form) {
   const assistantText = document.querySelector("#assist-poster-text");
   const studioView = document.querySelector(".studio-view");
   const assistantFeedback = document.querySelector("#assist-method-copy");
-  document.querySelector("#suggest-poster-copy").addEventListener("click", () => {
+  const suggestCopyButton = document.querySelector("#suggest-poster-copy");
+  suggestCopyButton.addEventListener("click", async () => {
     const idea = assistantText.value.trim();
     if (idea.length < 12) {
-      assistantFeedback.textContent = "Décrivez votre idée en quelques mots pour que je puisse préparer l’affiche.";
+      assistantFeedback.textContent = "Décrivez votre idée en quelques mots pour préparer une affiche complète.";
       assistantText.focus();
       return;
     }
-    const setValue = (selector, value) => { const field = document.querySelector(selector); if (field) field.value = value; };
-    const lower = idea.toLowerCase();
-    const businessType = /coiff|cheveu|barbier|salon/.test(lower) ? "Salon de coiffure" : /restaurant|pizza|burger|café|boulanger|pâtiss/.test(lower) ? "Restauration" : /fleur|plante|bouquet/.test(lower) ? "Fleuriste" : /vetement|vêtement|mode|boutique/.test(lower) ? "Boutique" : "Commerce";
-    const promoMatch = idea.match(/(?:promo(?:tion)?|offre|réduction|remise)\s*[:：-]?\s*([^.!?\n]+)/i);
-    const priceMatch = idea.match(/\b\d+(?:[,.]\d{1,2})?\s*€/);
-    const nameMatch = idea.match(/(?:pour|chez)\s+(?:mon|ma|le|la|l[’\x27])?\s*([A-ZÀ-ÖØ-Þ][\wÀ-ÿ’\x27-]*(?:\s+[A-ZÀ-ÖØ-Þ][\wÀ-ÿ’\x27-]*){0,2})/);
-    const title = promoMatch ? promoMatch[1].trim() : idea.split(/[.!?\n]/)[0].trim();
-    setValue("#business-name", nameMatch ? nameMatch[1] : "Mon commerce");
-    setValue("#business-type", businessType);
-    setValue("#business-description", idea);
-    setValue("#product", title.slice(0, 90) || "Notre offre");
-    setValue("#promotion", promoMatch ? promoMatch[1].trim() : "Découvrez notre offre");
-    setValue("#price", priceMatch ? priceMatch[0] : "");
-    setValue("#contact", "");
-    const palette = /noir|doré|dore|or\b/.test(lower) ? "mono" : /rose|pink/.test(lower) ? "berry" : /bleu|mer|océan/.test(lower) ? "ocean" : /violet|lavande/.test(lower) ? "lavender" : /orange|soleil|été|ete/.test(lower) ? "sunset" : "nature";
-    const paletteButton = document.querySelector(`[data-palette="${palette}"]`);
-    if (paletteButton) paletteButton.click();
-    updateRequiredValidity();
-    if (!form.reportValidity()) { assistantFeedback.textContent = "Ajoutez un peu plus de détails à votre idée."; return; }
-    form.requestSubmit();
-    assistantFeedback.textContent = "Votre affiche est prête dans l’aperçu. Vous pouvez encore modifier les informations et le modèle."; 
-    statusMessage.textContent = "Affiche créée à partir de votre idée. Personnalisez-la ou téléchargez-la."; 
-    document.querySelector("#preview-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!cloudClient) {
+      assistantFeedback.textContent = "Le service IA n’est pas disponible pour le moment.";
+      return;
+    }
+
+    suggestCopyButton.disabled = true;
+    suggestCopyButton.setAttribute("aria-busy", "true");
+    assistantFeedback.textContent = "L’assistant réfléchit à une vraie proposition publicitaire…";
+    try {
+      const { data, error } = await cloudClient.functions.invoke("poster-copywriter", {
+        body: { idea },
+      });
+      if (error) throw error;
+      if (!data?.copy) throw new Error(data?.error || "Réponse IA invalide.");
+
+      const copy = data.copy;
+      const setValue = (selector, value) => {
+        const field = document.querySelector(selector);
+        if (field) field.value = typeof value === "string" ? value : "";
+      };
+      setValue("#business-name", copy.businessName || "Votre commerce");
+      setValue("#business-type", copy.businessType || "Commerce");
+      setValue("#business-description", copy.description);
+      setValue("#product", copy.headline || copy.product || "Découvrez notre offre");
+      setValue("#promotion", copy.promotion);
+      setValue("#price", copy.price);
+      setValue("#contact", copy.contact);
+
+      const palette = ["nature", "mono", "berry", "ocean", "lavender", "sunset"].includes(copy.palette)
+        ? copy.palette
+        : "nature";
+      document.querySelector(`[data-palette="${palette}"]`)?.click();
+
+      updateRequiredValidity();
+      if (!form.reportValidity()) {
+        assistantFeedback.textContent = "L’assistant a préparé le texte, mais vérifiez les champs obligatoires.";
+        return;
+      }
+      form.requestSubmit();
+      assistantFeedback.textContent = "Proposition rédigée par l’IA. Relisez les informations, puis modifiez librement votre affiche.";
+      statusMessage.textContent = "Votre affiche a été préparée par l’assistant IA.";
+      document.querySelector("#preview-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      console.error("Assistant IA QUICKPOSTER indisponible", error);
+      assistantFeedback.textContent = "Impossible de joindre l’assistant IA. Vérifiez votre connexion et réessayez. Si le problème continue, le service doit être configuré.";
+    } finally {
+      suggestCopyButton.disabled = false;
+      suggestCopyButton.removeAttribute("aria-busy");
+    }
   });
   const paletteButtons = [...document.querySelectorAll("[data-palette]")];
 
