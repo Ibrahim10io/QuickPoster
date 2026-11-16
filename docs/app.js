@@ -727,7 +727,7 @@ if (form) {
   const getPosterSnapshot = (creation = null) => {
     const activeTemplate = [...poster.classList]
       .map((className) => className.replace("template-", ""))
-      .find((name) => Object.hasOwn(templateNames, name)) || "atelier";
+      .find((name) => Object.hasOwn(templateNames, name)) || "editorial";
     const template = Object.hasOwn(templateNames, creation?.template) ? creation.template : activeTemplate;
     const texts = creation
       ? Object.fromEntries(textFields.map((fieldName) => [fieldName, String(creation.texts?.[fieldName] || "").trim()]))
