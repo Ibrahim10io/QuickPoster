@@ -1898,3 +1898,10 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
  .studio-view .poster-product { font-size:clamp(17px,4.5vw,24px); }
  .studio-view .poster-promotion { font-size:clamp(11px,3.1vw,15px); }
 }
+
+
+/* Actions d’export toujours accessibles, y compris en mode assistant IA. */
+.preview-export-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(155,184,178,.17)}
+.preview-export-actions .secondary-button{min-height:42px}
+.studio-view.assistant-mode .preview-export-actions{justify-content:center;gap:12px;margin-top:22px}
+@media(max-width:560px){.preview-export-actions{display:grid;grid-template-columns:1fr}.preview-export-actions .secondary-button{width:100%;justify-content:center}}
