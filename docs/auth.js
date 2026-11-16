@@ -218,7 +218,7 @@
       } else {
         showStatus(mode === "signup" ? "Création du compte en cours…" : "Connexion en cours…");
         const result = mode === "signup"
-          ? await client.auth.signUp({ email, password, options: { data: { first_name: firstNameInput.value.trim(), last_name: lastNameInput.value.trim(), username: usernameInput.value.trim(), business_name: businessInput.value.trim() } } })
+          ? await client.auth.signUp({ email, password, options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/", data: { first_name: firstNameInput.value.trim(), last_name: lastNameInput.value.trim(), username: usernameInput.value.trim(), business_name: businessInput.value.trim() } } })
           : await client.auth.signInWithPassword({ email, password });
         if (result.error) {
           if (mode === "signup" && /already registered|already exists/i.test(result.error.message || "")) {
@@ -265,7 +265,7 @@
 
   resendButton.addEventListener("click", async () => {
     resendButton.disabled = true;
-    const { error } = await client.auth.resend({ type: "signup", email: emailInput.value.trim() });
+    const { error } = await client.auth.resend({ type: "signup", email: emailInput.value.trim(), options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/" } });
     resendButton.disabled = false;
     showStatus(error ? (error.message || "Impossible de demander un nouvel envoi.") : "Demande de renvoi acceptée. La réception du message n’est pas encore confirmée.");
   });
