@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f6f2">
     <meta name="description" content="QUICKPOSTER — votre espace de création d’affiches.">
     <title>QUICKPOSTER — Accueil</title>
-    <link rel="stylesheet" href="styles.css?v=unified-light-1">
+    <link rel="stylesheet" href="styles.css?v=theme-quick-toggle-1">
     <script src="vendor/html2canvas.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
     <script src="app.js?v=shared-image-upload-2" defer></script>
@@ -55,10 +55,16 @@
       <main class="main-content">
         <header class="topbar">
           <div class="breadcrumb"><span>Votre espace</span><span class="breadcrumb-separator">/</span><strong id="page-label">Accueil</strong></div>
-          <div class="auth-actions" id="auth-actions">
+          <div class="topbar-tools">
+            <button class="theme-quick-toggle" id="theme-quick-toggle" type="button" aria-label="Activer le thème clair" title="Activer le thème clair">
+              <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+              <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.7 8.7 0 1 0 20.2 15.2Z"/></svg>
+            </button>
+            <div class="auth-actions" id="auth-actions">
             <button class="topbar-link auth-open-button" id="auth-login-button" type="button">Connexion</button>
             <button class="topbar-link auth-signup-button" id="auth-signup-button" type="button">S'inscrire</button>
             <button class="topbar-link auth-open-button" id="auth-open-button" type="button" hidden>Mon compte</button>
+            </div>
           </div>
         </header>
 
