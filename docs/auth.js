@@ -296,11 +296,27 @@
     showStatus("Mot de passe mis à jour.");
   });
 
-  $("#theme-toggle").addEventListener("change", (event) => {
-    const theme = event.target.checked ? "light" : "dark";
-    localStorage.setItem("quickposter-theme", theme);
+  const quickThemeToggle = $("#theme-quick-toggle");
+  const applyTheme = (theme) => {
     document.body.dataset.theme = theme;
+    localStorage.setItem("quickposter-theme", theme);
+    $("#theme-toggle").checked = theme === "light";
+    if (quickThemeToggle) {
+      const nextLabel = theme === "light" ? "Activer le thème sombre" : "Activer le thème clair";
+      quickThemeToggle.setAttribute("aria-label", nextLabel);
+      quickThemeToggle.title = nextLabel;
+    }
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.content = theme === "light" ? "#f3f6f3" : "#20252b";
+  };
+
+  $("#theme-toggle").addEventListener("change", (event) => {
+    applyTheme(event.target.checked ? "light" : "dark");
     showStatus("Préférence d’apparence enregistrée sur cet appareil.");
+  });
+
+  quickThemeToggle?.addEventListener("click", () => {
+    applyTheme(document.body.dataset.theme === "light" ? "dark" : "light");
   });
 
   $("#email-notifications-toggle").addEventListener("change", (event) => {
@@ -308,7 +324,7 @@
     showStatus("Préférence enregistrée sur cet appareil. Les e-mails automatiques ne sont pas encore activés.");
   });
 
-  document.body.dataset.theme = localStorage.getItem("quickposter-theme") || "dark";
+  applyTheme(localStorage.getItem("quickposter-theme") || "dark");
 
   signoutButton.addEventListener("click", async () => {
     signoutButton.disabled = true;
