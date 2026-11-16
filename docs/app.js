@@ -27,6 +27,7 @@ function toCloudCreation(creation, userId) {
       texts: creation.texts,
       template: creation.template,
       colors: creation.colors,
+      photo: creation.photo || null,
     },
     created_at: creation.createdAt,
     updated_at: new Date().toISOString(),
@@ -42,6 +43,7 @@ function fromCloudCreation(row) {
     texts: data.texts || {},
     template: data.template || "atelier",
     colors: data.colors || { background: "#ffffff", accent: "#222222" },
+    photo: data.photo || null,
     createdAt: row.created_at,
   };
 }
@@ -153,7 +155,7 @@ const templateNames = {
   impact: "Impact",
   editorial: "Éditorial",
 };
-const posterTextFields = ["businessName", "businessType", "description", "product", "promotion", "price", "contact"];
+const posterTextFields = ["businessName", "businessType", "headline", "description", "product", "promotion", "price", "contact"];
 
 function readCreations() {
   try {
@@ -341,6 +343,8 @@ if (form) {
   const colorInputs = [
     document.querySelector("#background-color"),
     document.querySelector("#accent-color"),
+    document.querySelector("#text-color"),
+    document.querySelector("#secondary-color"),
   ];
   const requiredFields = [
     document.querySelector("#business-name"),
@@ -387,6 +391,7 @@ if (form) {
   if (infoPanel) infoPanel.hidden = false;
   const posterPhotoInput = document.querySelector("#poster-photo");
   let selectedPhotoUrl = null;
+  let selectedPhotoData = null;
 
   creationModeButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -408,7 +413,19 @@ if (form) {
     });
   });
 
-  posterPhotoInput.addEventListener("change", () => {
+  const compressPhotoForStorage = async (file) => {
+    const bitmap = await createImageBitmap(file);
+    const ratio = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
+    canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Préparation de la photo impossible.");
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    return canvas.toDataURL("image/jpeg", 0.76);
+  };
+  posterPhotoInput.addEventListener("change", async () => {
     const file = posterPhotoInput.files?.[0];
     if (!file) return;
     if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
@@ -416,27 +433,33 @@ if (form) {
       statusMessage.textContent = "Choisissez une image PNG, JPG ou WebP de 5 Mo maximum.";
       return;
     }
-    if (selectedPhotoUrl) URL.revokeObjectURL(selectedPhotoUrl);
-    selectedPhotoUrl = URL.createObjectURL(file);
-    let photo = poster.querySelector(".user-poster-photo");
-    if (!photo) {
-      photo = document.createElement("img");
-      photo.className = "user-poster-photo";
-      photo.alt = "Photo ajoutée à l’affiche";
-      poster.prepend(photo);
+    statusMessage.textContent = "Optimisation de la photo…";
+    try {
+      selectedPhotoData = await compressPhotoForStorage(file);
+      selectedPhotoUrl = selectedPhotoData;
+      let photo = poster.querySelector(".user-poster-photo");
+      if (!photo) {
+        photo = document.createElement("img");
+        photo.className = "user-poster-photo";
+        photo.alt = "Photo ajoutée à l’affiche";
+        poster.prepend(photo);
+      }
+      photo.src = selectedPhotoData;
+      photo.style.left = "8%";
+      photo.style.top = "8%";
+      photo.style.width = "44%";
+      photo.style.height = "auto";
+      photo.style.maxHeight = "34%";
+      photo.style.position = "absolute";
+      photo.style.zIndex = "5";
+      poster.hidden = false;
+      emptyPreview.hidden = true;
+      invalidatePosterCanvas();
+      statusMessage.textContent = "Photo optimisée. Elle sera conservée avec l’affiche enregistrée.";
+    } catch (error) {
+      console.error("Préparation de la photo impossible", error);
+      statusMessage.textContent = "Impossible de préparer cette photo. Essayez un autre fichier.";
     }
-    photo.src = selectedPhotoUrl;
-    photo.style.left = "8%";
-    photo.style.top = "8%";
-    photo.style.width = "44%";
-    photo.style.height = "auto";
-    photo.style.maxHeight = "34%";
-    photo.style.position = "absolute";
-    photo.style.zIndex = "5";
-    poster.hidden = false;
-    emptyPreview.hidden = true;
-    invalidatePosterCanvas();
-    statusMessage.textContent = "Photo ajoutée. Faites-la glisser directement sur l’affiche pour la placer où vous voulez.";
   });
 
   let draggedPhoto = null;
@@ -510,7 +533,8 @@ if (form) {
       setValue("#business-name", copy.businessName || "Votre commerce");
       setValue("#business-type", copy.businessType || "Commerce");
       setValue("#business-description", copy.description);
-      setValue("#product", copy.headline || copy.product || "Découvrez notre offre");
+      setValue("#headline", copy.headline);
+      setValue("#product", copy.product || copy.headline || "Découvrez notre offre");
       setValue("#promotion", copy.promotion);
       setValue("#price", copy.price);
       setValue("#contact", copy.contact);
@@ -519,6 +543,7 @@ if (form) {
         ? copy.palette
         : "nature";
       document.querySelector(`[data-palette="${palette}"]`)?.click();
+      if (copy.colors && typeof copy.colors === "object") applyAiColors(copy.colors);
 
       updateRequiredValidity();
       if (!form.reportValidity()) {
@@ -542,6 +567,23 @@ if (form) {
   const setPosterColors = () => {
     poster.style.setProperty("--poster-bg", colorInputs[0].value);
     poster.style.setProperty("--poster-accent", colorInputs[1].value);
+    poster.style.setProperty("--poster-text", colorInputs[2].value);
+    poster.style.setProperty("--poster-muted", colorInputs[3].value);
+    invalidatePosterCanvas();
+  };
+  const applyAiColors = (colors = {}) => {
+    const valid = (v) => typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v);
+    const values = [
+      valid(colors.background) ? colors.background : colorInputs[0].value,
+      valid(colors.accent) ? colors.accent : colorInputs[1].value,
+      valid(colors.text) ? colors.text : colorInputs[2].value,
+      valid(colors.secondary) ? colors.secondary : colorInputs[3].value,
+    ];
+    [0, 1, 2, 3].forEach((i) => { colorInputs[i].value = values[i]; });
+    poster.style.setProperty("--poster-bg", values[0]);
+    poster.style.setProperty("--poster-accent", values[1]);
+    poster.style.setProperty("--poster-text", values[2]);
+    poster.style.setProperty("--poster-muted", values[3]);
     invalidatePosterCanvas();
   };
 
@@ -586,7 +628,8 @@ if (form) {
   const setPosterText = (fieldName, value) => {
     invalidatePosterCanvas();
     const element = poster.querySelector(`[data-poster-field="${fieldName}"]`);
-    const text = value.trim();
+    if (!element) return;
+    const text = String(value || "").trim();
     const lines = text.split("\n");
     element.replaceChildren(...lines.flatMap((line, index) => (
       index === 0 ? [document.createTextNode(line)] : [document.createElement("br"), document.createTextNode(line)]
@@ -613,6 +656,7 @@ if (form) {
 
   const applyPosterText = (targetPoster, fieldName, value) => {
     const element = targetPoster.querySelector(`[data-poster-field="${fieldName}"]`);
+    if (!element) return;
     const text = String(value || "").trim();
     const lines = text.split("\n");
     element.replaceChildren(...lines.flatMap((line, index) => (
@@ -645,10 +689,26 @@ if (form) {
     exportPoster.hidden = false;
     exportPoster.className = `poster template-${snapshot.template}`;
     exportPoster.style.setProperty("--poster-bg", snapshot.colors.background);
+    exportPoster.style.setProperty("--poster-text", snapshot.colors.text || "#292c25");
     exportPoster.style.setProperty("--poster-accent", snapshot.colors.accent);
+    exportPoster.style.setProperty("--poster-muted", snapshot.colors.secondary || "#686d62");
+    exportPoster.style.width = `${snapshot.width}px`;
     exportPoster.style.boxShadow = "none";
-
     textFields.forEach((fieldName) => applyPosterText(exportPoster, fieldName, snapshot.texts[fieldName]));
+    const savedPhoto = snapshot.photo;
+    let exportPhoto = exportPoster.querySelector(".user-poster-photo");
+    if (savedPhoto?.data) {
+      if (!exportPhoto) {
+        exportPhoto = document.createElement("img");
+        exportPhoto.className = "user-poster-photo";
+        exportPhoto.alt = "Photo ajoutée à l’affiche";
+        exportPoster.prepend(exportPhoto);
+      }
+      exportPhoto.src = savedPhoto.data;
+      exportPhoto.style.left = `${savedPhoto.left ?? 8}%`;
+      exportPhoto.style.top = `${savedPhoto.top ?? 8}%`;
+      exportPhoto.style.width = `${savedPhoto.width ?? 44}%`;
+    } else exportPhoto?.remove();
 
     exportPoster.querySelectorAll("[contenteditable]").forEach((element) => {
       element.removeAttribute("contenteditable");
@@ -672,22 +732,21 @@ if (form) {
     const texts = creation
       ? Object.fromEntries(textFields.map((fieldName) => [fieldName, String(creation.texts?.[fieldName] || "").trim()]))
       : Object.fromEntries(textFields.map((fieldName) => [fieldName, readPosterText(fieldName)]));
+    const validColor = (v, fallback) => /^#[\da-f]{6}$/i.test(v || "") ? v : fallback;
     const colors = {
-      background: /^#[\da-f]{6}$/i.test(creation?.colors?.background || "")
-        ? creation.colors.background
-        : colorInputs[0].value,
-      accent: /^#[\da-f]{6}$/i.test(creation?.colors?.accent || "")
-        ? creation.colors.accent
-        : colorInputs[1].value,
+      background: validColor(creation?.colors?.background, colorInputs[0].value),
+      text: validColor(creation?.colors?.text, colorInputs[2].value),
+      accent: validColor(creation?.colors?.accent, colorInputs[1].value),
+      secondary: validColor(creation?.colors?.secondary, colorInputs[3].value),
     };
-
-    return {
-      template,
-      texts,
-      colors,
-      width: poster.getBoundingClientRect().width || 290,
-      scale: 2,
-    };
+    const livePhoto = poster.querySelector(".user-poster-photo");
+    const photo = creation?.photo || (selectedPhotoData && livePhoto ? {
+      data: selectedPhotoData,
+      left: Number.parseFloat(livePhoto.style.left) || 8,
+      top: Number.parseFloat(livePhoto.style.top) || 8,
+      width: Number.parseFloat(livePhoto.style.width) || 44,
+    } : null);
+    return { template, texts, colors, photo, width: 794, scale: 2 };
   };
 
   const renderPosterCanvas = async (snapshot, onProgress) => {
@@ -775,7 +834,7 @@ if (form) {
 
     const pageWidth = 595.28;
     const pageHeight = 841.89;
-    const margin = 24;
+    const margin = 0;
     const fitScale = Math.min(
       (pageWidth - margin * 2) / canvas.width,
       (pageHeight - margin * 2) / canvas.height,
@@ -923,8 +982,16 @@ if (form) {
       template,
       colors: {
         background: colorInputs[0].value,
+        text: colorInputs[2].value,
         accent: colorInputs[1].value,
+        secondary: colorInputs[3].value,
       },
+      photo: selectedPhotoData && poster.querySelector(".user-poster-photo") ? {
+        data: selectedPhotoData,
+        left: Number.parseFloat(poster.querySelector(".user-poster-photo").style.left) || 8,
+        top: Number.parseFloat(poster.querySelector(".user-poster-photo").style.top) || 8,
+        width: Number.parseFloat(poster.querySelector(".user-poster-photo").style.width) || 44,
+      } : null,
     };
   };
 
@@ -934,6 +1001,7 @@ if (form) {
     texts: creation.texts,
     template: creation.template,
     colors: creation.colors,
+    photo: creation.photo || null,
   });
 
   const openCreation = (creationId) => {
@@ -947,8 +1015,24 @@ if (form) {
       setPosterText(fieldName, creation.texts[fieldName] || "");
     });
 
-    colorInputs[0].value = creation.colors.background;
-    colorInputs[1].value = creation.colors.accent;
+    colorInputs[0].value = creation.colors.background || "#f4efe6";
+    colorInputs[1].value = creation.colors.accent || "#b6d84b";
+    colorInputs[2].value = creation.colors.text || "#292c25";
+    colorInputs[3].value = creation.colors.secondary || "#686d62";
+    selectedPhotoData = creation.photo?.data || null;
+    const previousPhoto = poster.querySelector(".user-poster-photo");
+    if (creation.photo?.data) {
+      const photo = previousPhoto || document.createElement("img");
+      photo.className = "user-poster-photo";
+      photo.alt = "Photo ajoutée à l’affiche";
+      photo.src = creation.photo.data;
+      photo.style.left = `${creation.photo.left ?? 8}%`;
+      photo.style.top = `${creation.photo.top ?? 8}%`;
+      photo.style.width = `${creation.photo.width ?? 44}%`;
+      photo.style.position = "absolute";
+      photo.style.zIndex = "5";
+      poster.prepend(photo);
+    } else previousPhoto?.remove();
     setPosterColors();
     updateTemplateSelection(creation.template);
     poster.hidden = false;
@@ -999,6 +1083,7 @@ if (form) {
     const data = new FormData(form);
     setPosterText("businessName", data.get("businessName"));
     setPosterText("businessType", data.get("businessType"));
+    setPosterText("headline", data.get("headline"));
     setPosterText("description", data.get("description"));
     setPosterText("product", data.get("product"));
     setPosterText("promotion", data.get("promotion"));
