@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#f5f6f2">
     <meta name="description" content="QUICKPOSTER — votre espace de création d’affiches.">
     <title>QUICKPOSTER — Accueil</title>
-    <link rel="stylesheet" href="styles.css?v=studio-fullscreen-2">
+    <link rel="stylesheet" href="styles.css?v=a4-layout-1">
     <script src="vendor/html2canvas.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
-    <script src="app.js?v=assistant-fix-6" defer></script>
+    <script src="app.js?v=a4-layout-1" defer></script>
     <script src="auth.js?v=signup-redirect-1" defer></script>
   </head>
   <body>
@@ -200,6 +200,10 @@
                       <input id="product" name="product" type="text" placeholder="Ex. Bouquets de saison" required>
                     </div>
                     <div class="field field-wide">
+                      <label for="headline">Titre principal de l'affiche <span class="optional-label">Facultatif</span></label>
+                      <input id="headline" name="headline" type="text" placeholder="Ex. La gourmandise commence ici">
+                    </div>
+                    <div class="field field-wide">
                       <label for="promotion">Texte promotionnel <span class="optional-label">Facultatif</span></label>
                       <input id="promotion" name="promotion" type="text" placeholder="Ajoutez votre propre message, si vous le souhaitez">
                     </div>
@@ -216,14 +220,10 @@
                   <fieldset class="color-fieldset">
                     <legend>Choix de couleurs <span class="optional-label">Personnalisez votre affiche</span></legend>
                     <div class="color-options">
-                      <label class="color-control" for="background-color">
-                        <span class="color-swatch"><input id="background-color" name="backgroundColor" type="color" value="#f4efe6" aria-label="Couleur de fond"></span>
-                        <span>Fond</span>
-                      </label>
-                      <label class="color-control" for="accent-color">
-                        <span class="color-swatch"><input id="accent-color" name="accentColor" type="color" value="#b6d84b" aria-label="Couleur d'accent"></span>
-                        <span>Accent</span>
-                      </label>
+                      <label class="color-control" for="background-color"><span class="color-swatch"><input id="background-color" name="backgroundColor" type="color" value="#f4efe6" aria-label="Couleur de fond"></span><span>Fond</span></label>
+                      <label class="color-control" for="text-color"><span class="color-swatch"><input id="text-color" name="textColor" type="color" value="#292c25" aria-label="Couleur du texte"></span><span>Texte</span></label>
+                      <label class="color-control" for="accent-color"><span class="color-swatch"><input id="accent-color" name="accentColor" type="color" value="#b6d84b" aria-label="Couleur d'accent"></span><span>Accent</span></label>
+                      <label class="color-control" for="secondary-color"><span class="color-swatch"><input id="secondary-color" name="secondaryColor" type="color" value="#686d62" aria-label="Couleur secondaire"></span><span>Secondaire</span></label>
                     </div>
                     <div class="palette-presets" role="group" aria-label="Palettes de couleurs prêtes à l’emploi">
                       <span class="palette-presets-label">Ambiances rapides</span>
@@ -293,6 +293,7 @@
                     <span class="poster-rule" aria-hidden="true"></span>
                     <p class="poster-type" data-poster-field="businessType" contenteditable="true" role="textbox" aria-label="Type de commerce modifiable" spellcheck="true"></p>
                     <h2 class="poster-name" data-poster-field="businessName" contenteditable="true" role="textbox" aria-label="Nom du commerce modifiable" spellcheck="true"></h2>
+                    <h3 class="poster-headline" data-poster-field="headline" contenteditable="true" role="textbox" aria-label="Titre principal modifiable" spellcheck="true" hidden></h3>
                     <p class="poster-description" data-poster-field="description" contenteditable="true" role="textbox" aria-label="Description modifiable" spellcheck="true" hidden></p>
                     <div class="poster-divider" aria-hidden="true"></div>
                     <p class="poster-product-label">À découvrir</p>
