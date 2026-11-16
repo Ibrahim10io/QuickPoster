@@ -2576,3 +2576,119 @@ body[data-theme="light"] .mobile-menu-toggle {
   background:#fbfaf7;
   border-color:#e2dfd7;
 }
+
+
+/* Palette plus vivante : bleu franc en couleur principale, corail en accent. */
+body[data-theme="light"] {
+  --green:#315BFF;
+  --green-dark:#2446D8;
+  --canvas:#F2F1ED;
+  --paper:#FBFAF7;
+}
+body:not([data-theme="light"]) {
+  --green:#7898FF;
+  --green-dark:#405FC5;
+}
+body[data-theme="light"] .brand-mark,
+body[data-theme="light"] .primary-button,
+body[data-theme="light"] .studio-view .form-footer .primary-button,
+body[data-theme="light"] .studio-view .preview-export-actions .save-button {
+  color:#fff;
+  background:#315BFF;
+  border-color:#315BFF;
+  box-shadow:0 7px 20px rgba(49,91,255,.24);
+}
+body[data-theme="light"] .primary-button:hover,
+body[data-theme="light"] .studio-view .form-footer .primary-button:hover,
+body[data-theme="light"] .studio-view .preview-export-actions .save-button:hover {
+  color:#fff;
+  background:#2446D8;
+  border-color:#2446D8;
+}
+body[data-theme="light"] .nav-link[aria-current="page"] {
+  color:#2446D8;
+  background:#E6ECFF;
+  box-shadow:inset 3px 0 #315BFF;
+}
+body[data-theme="light"] .nav-link[aria-current="page"] svg,
+body[data-theme="light"] .brand > span:last-child > span,
+body[data-theme="light"] .note-icon,
+body[data-theme="light"] .sidebar-version span,
+body[data-theme="light"] .studio-view .intro h1 span,
+body[data-theme="light"] .studio-view .step-number,
+body[data-theme="light"] .studio-view .selection-mark {
+  color:#315BFF;
+}
+body[data-theme="light"] .studio-view .method-symbol,
+body[data-theme="light"] .studio-view .empty-icon {
+  color:#315BFF;
+  background:#E6ECFF;
+}
+body[data-theme="light"] .studio-view .method-card.is-selected,
+body[data-theme="light"] .studio-view .template-option.is-selected,
+body[data-theme="light"] .studio-view .palette-chip.is-selected {
+  color:#2446D8;
+  border-color:#7895FF;
+  background:#E6ECFF;
+  box-shadow:inset 0 0 0 1px rgba(49,91,255,.2);
+}
+body[data-theme="light"] .studio-view .field input:focus,
+body[data-theme="light"] .studio-view .field textarea:focus,
+body[data-theme="light"] input:focus-visible,
+body[data-theme="light"] textarea:focus-visible,
+body[data-theme="light"] select:focus-visible {
+  border-color:#315BFF;
+  outline-color:#315BFF;
+  box-shadow:0 0 0 4px rgba(49,91,255,.16);
+}
+body[data-theme="light"] .topbar-link:hover,
+body[data-theme="light"] .secondary-button:hover {
+  border-color:#315BFF;
+  box-shadow:0 0 0 3px rgba(49,91,255,.10);
+}
+body[data-theme="light"] .studio-view .intro .eyebrow-dot,
+body[data-theme="light"] .studio-view .status-dot,
+body[data-theme="light"] .studio-view .image-field-badge {
+  color:#D94131;
+  background:#FF5B45;
+}
+body[data-theme="light"] .studio-view .image-field-badge {
+  color:#B9362A;
+  background:#FFF0EC;
+  border-color:#FFC4B9;
+}
+body:not([data-theme="light"]) .brand-mark,
+body:not([data-theme="light"]) .primary-button,
+body:not([data-theme="light"]) .studio-view .form-footer .primary-button,
+body:not([data-theme="light"]) .studio-view .preview-export-actions .save-button {
+  color:#101A36;
+  background:#7898FF;
+  border-color:#7898FF;
+  box-shadow:0 7px 22px rgba(120,152,255,.25);
+}
+body:not([data-theme="light"]) .primary-button:hover,
+body:not([data-theme="light"]) .studio-view .form-footer .primary-button:hover {
+  background:#9AB0FF;
+  border-color:#9AB0FF;
+}
+body:not([data-theme="light"]) .nav-link[aria-current="page"] {
+  background:rgba(120,152,255,.15);
+  box-shadow:inset 3px 0 #7898FF;
+}
+body:not([data-theme="light"]) .nav-link[aria-current="page"] svg,
+body:not([data-theme="light"]) .brand > span:last-child > span,
+body:not([data-theme="light"]) .note-icon,
+body:not([data-theme="light"]) .sidebar-version span {
+  color:#9AB0FF;
+}
+body:not([data-theme="light"]) .studio-view .method-card.is-selected,
+body:not([data-theme="light"]) .studio-view .template-option.is-selected,
+body:not([data-theme="light"]) .studio-view .palette-chip.is-selected {
+  border-color:#7898FF;
+  background:rgba(120,152,255,.14);
+}
+body:not([data-theme="light"]) .studio-view .intro .eyebrow-dot,
+body:not([data-theme="light"]) .studio-view .status-dot {
+  background:#FF705E;
+  box-shadow:0 0 0 3px rgba(255,112,94,.2);
+}
