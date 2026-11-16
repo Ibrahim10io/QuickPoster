@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#f5f6f2">
     <meta name="description" content="QUICKPOSTER — votre espace de création d’affiches.">
     <title>QUICKPOSTER — Accueil</title>
-    <link rel="stylesheet" href="styles.css?v=a4-layout-1">
+    <link rel="stylesheet" href="styles.css?v=ai-image-reference-1">
     <script src="vendor/html2canvas.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
-    <script src="app.js?v=a4-layout-1" defer></script>
+    <script src="app.js?v=ai-image-reference-1" defer></script>
     <script src="auth.js?v=signup-redirect-1" defer></script>
   </head>
   <body>
@@ -145,13 +145,7 @@
               <div class="method-grid">
                 <button class="method-card is-selected" type="button" data-creation-mode="templates" aria-pressed="true"><span class="method-symbol">▦</span><strong>Modèles prêts à l'emploi</strong><small>Partez d'un design et personnalisez-le.</small></button>
                 <button class="method-card" type="button" data-creation-mode="free" aria-pressed="false"><span class="method-symbol">✎</span><strong>Création libre</strong><small>Composez votre affiche et modifiez les textes directement.</small></button>
-                <button class="method-card" type="button" data-creation-mode="photo" aria-pressed="false"><span class="method-symbol">▧</span><strong>À partir d'une photo</strong><small>Ajoutez votre image à votre composition.</small></button>
                 <button class="method-card" type="button" data-creation-mode="assist" aria-pressed="false"><span class="method-symbol">✦</span><strong>Assistant de rédaction</strong><small>Obtenez une proposition de texte à personnaliser.</small></button>
-              </div>
-              <div class="method-panel" id="photo-method-panel" hidden>
-                <label for="poster-photo">Choisir une photo depuis votre appareil</label>
-                <input id="poster-photo" type="file" accept="image/png,image/jpeg,image/webp">
-                <p class="method-help">L'image est utilisée dans l'aperçu de cette session. Évite les photos contenant des informations personnelles.</p>
               </div>
               <div class="method-panel" id="assist-method-panel" hidden>
                 <div class="assistant-composer">
@@ -161,6 +155,21 @@
                   </div>
                   <label for="assist-poster-text">Quelle affiche voulez-vous créer ?</label>
                   <textarea id="assist-poster-text" rows="5" placeholder="Ex. Je veux une affiche élégante pour mon salon de coiffure. Promo : -20 % sur les brushings jusqu’à la fin du mois. Couleurs noir et doré."></textarea>
+                  <div class="assistant-image-field">
+                    <label for="assist-poster-image">Image de référence <span>(facultatif)</span></label>
+                    <input id="assist-poster-image" type="file" accept="image/png,image/jpeg,image/webp">
+                    <p class="assistant-image-help">L’IA analyse l’image pour s’inspirer de son style, de ses couleurs ou de sa composition.</p>
+                    <div class="assistant-image-preview" id="assist-image-preview" hidden>
+                      <img id="assist-image-thumbnail" alt="Aperçu de l’image de référence">
+                      <span id="assist-image-name">Image ajoutée</span>
+                      <button id="assist-image-remove" type="button" aria-label="Retirer l’image">Retirer</button>
+                    </div>
+                    <label class="assistant-image-toggle" for="assist-add-image">
+                      <input id="assist-add-image" type="checkbox" checked>
+                      <span><strong>Ajouter aussi cette image à l’affiche</strong><small>Tu pourras ensuite la déplacer dans l’aperçu.</small></span>
+                    </label>
+                  </div>
+
                   <div class="assistant-composer-footer">
                     <span>Pas besoin de remplir les autres champs.</span>
                     <button class="primary-button" id="suggest-poster-copy" type="button">Créer mon affiche <span aria-hidden="true">✦</span></button>
