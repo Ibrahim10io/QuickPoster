@@ -2519,7 +2519,7 @@ body:not([data-theme="light"]) .studio-view .preview-export-actions .save-button
 }
 
 /* Blanc casse chaleureux : moins d'eclat, sans jaunir l'interface. */
-body[data-theme="light] {
+body[data-theme="light"] {
   --canvas:#f2f1ed;
   --paper:#fbfaf7;
   --sidebar:#f3f2ee;
