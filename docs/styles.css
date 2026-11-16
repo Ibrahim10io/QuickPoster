@@ -1905,3 +1905,20 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
 .preview-export-actions .secondary-button{min-height:42px}
 .studio-view.assistant-mode .preview-export-actions{justify-content:center;gap:12px;margin-top:22px}
 @media(max-width:560px){.preview-export-actions{display:grid;grid-template-columns:1fr}.preview-export-actions .secondary-button{width:100%;justify-content:center}}
+
+/* Image de référence intégrée directement à l’assistant IA */
+.assistant-image-field{margin-top:18px;padding:15px;border:1px solid rgba(155,184,178,.22);border-radius:11px;background:rgba(10,18,22,.28)}
+.assistant-image-field>label:first-child{display:block;margin:0 0 9px;color:#f5f7f6;font-size:12px;font-weight:700}
+.assistant-image-field>label:first-child span{color:#aab8b0;font-weight:400}
+.assistant-image-field input[type=file]{display:block;width:100%;max-width:100%;padding:10px;border:1px dashed #687a70;border-radius:8px;color:#dce6e0;background:rgba(10,18,22,.35);font:inherit;font-size:11px}
+.assistant-image-help{margin:8px 0 0;color:#aab8b0;font-size:10px;line-height:1.5}
+.assistant-image-preview{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px;border-radius:9px;background:rgba(255,255,255,.07)}
+.assistant-image-preview[hidden]{display:none}
+.assistant-image-preview img{width:54px;height:54px;flex:0 0 54px;object-fit:cover;border-radius:7px}
+.assistant-image-preview span{min-width:0;flex:1;overflow:hidden;color:#f5f7f6;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.assistant-image-preview button{border:0;color:#f2b5a9;background:transparent;font:inherit;font-size:10px;cursor:pointer}
+.assistant-image-toggle{display:flex;align-items:flex-start;gap:10px;margin-top:13px;color:#f5f7f6;cursor:pointer}
+.assistant-image-toggle input{margin:2px 0 0;accent-color:#42db83}
+.assistant-image-toggle strong,.assistant-image-toggle small{display:block}
+.assistant-image-toggle strong{font-size:11px}
+.assistant-image-toggle small{margin-top:3px;color:#aab8b0;font-size:10px;line-height:1.5}
