@@ -400,6 +400,9 @@ if (form) {
       });
       const mode = button.dataset.creationMode;
       assistMethodPanel.hidden = mode !== "assist";
+      if (mode !== "assist" && assistantPhotoData && addImageToPoster?.checked) {
+        applyPhotoToPoster(assistantPhotoData);
+      }
       if (infoPanel) infoPanel.hidden = mode === "assist";
       document.querySelector(".studio-view")?.classList.toggle("assistant-mode", mode === "assist");
       if (mode === "free") {
@@ -461,7 +464,13 @@ if (form) {
       assistantImageThumbnail.src = assistantPhotoData;
       assistantImageName.textContent = file.name;
       assistantImagePreview.hidden = false;
-      assistantFeedback.textContent = "Image ajoutée. L’IA pourra s’en inspirer.";
+      const activeMode = document.querySelector("[data-creation-mode].is-selected")?.dataset.creationMode;
+      if (activeMode !== "assist" && addImageToPoster.checked) {
+        applyPhotoToPoster(assistantPhotoData);
+        assistantFeedback.textContent = "Image ajoutée à l’affiche. Tu peux la déplacer dans l’aperçu.";
+      } else {
+        assistantFeedback.textContent = "Image ajoutée. L’assistant IA pourra aussi s’en inspirer.";
+      }
     } catch (error) {
       console.error("Préparation de l’image impossible", error);
       assistantFeedback.textContent = "Impossible de préparer cette image. Essaie un autre fichier.";
@@ -469,10 +478,27 @@ if (form) {
   });
   assistantImageRemove.addEventListener("click", () => {
     assistantPhotoData = null;
+    selectedPhotoData = null;
     assistantPhotoInput.value = "";
     assistantImageThumbnail.removeAttribute("src");
     assistantImagePreview.hidden = true;
+    poster.querySelector(".user-poster-photo")?.remove();
+    invalidatePosterCanvas();
     assistantFeedback.textContent = "Image retirée.";
+  });
+  addImageToPoster.addEventListener("change", () => {
+    const activeMode = document.querySelector("[data-creation-mode].is-selected")?.dataset.creationMode;
+    if (!addImageToPoster.checked) {
+      if (activeMode !== "assist") {
+        selectedPhotoData = null;
+        poster.querySelector(".user-poster-photo")?.remove();
+        invalidatePosterCanvas();
+      }
+      return;
+    }
+    if (assistantPhotoData && activeMode !== "assist") {
+      applyPhotoToPoster(assistantPhotoData);
+    }
   });
 
 
