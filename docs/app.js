@@ -385,13 +385,11 @@ if (form) {
   };
 
   const creationModeButtons = [...document.querySelectorAll("[data-creation-mode]")];
-  const photoMethodPanel = document.querySelector("#photo-method-panel");
   const assistMethodPanel = document.querySelector("#assist-method-panel");
   const infoPanel = document.querySelector(".assistant-hidden-form");
   if (infoPanel) infoPanel.hidden = false;
-  const posterPhotoInput = document.querySelector("#poster-photo");
-  let selectedPhotoUrl = null;
   let selectedPhotoData = null;
+  let assistantPhotoData = null;
 
   creationModeButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -401,7 +399,6 @@ if (form) {
         item.setAttribute("aria-pressed", String(active));
       });
       const mode = button.dataset.creationMode;
-      photoMethodPanel.hidden = mode !== "photo";
       assistMethodPanel.hidden = mode !== "assist";
       if (infoPanel) infoPanel.hidden = mode === "assist";
       document.querySelector(".studio-view")?.classList.toggle("assistant-mode", mode === "assist");
@@ -425,42 +422,59 @@ if (form) {
     bitmap.close?.();
     return canvas.toDataURL("image/jpeg", 0.76);
   };
-  posterPhotoInput.addEventListener("change", async () => {
-    const file = posterPhotoInput.files?.[0];
+  const assistantPhotoInput = document.querySelector("#assist-poster-image");
+  const assistantImagePreview = document.querySelector("#assist-image-preview");
+  const assistantImageThumbnail = document.querySelector("#assist-image-thumbnail");
+  const assistantImageName = document.querySelector("#assist-image-name");
+  const assistantImageRemove = document.querySelector("#assist-image-remove");
+  const addImageToPoster = document.querySelector("#assist-add-image");
+  const applyPhotoToPoster = (dataUrl) => {
+    selectedPhotoData = dataUrl;
+    let photo = poster.querySelector(".user-poster-photo");
+    if (!photo) {
+      photo = document.createElement("img");
+      photo.className = "user-poster-photo";
+      photo.alt = "Photo ajoutée à l’affiche";
+      poster.prepend(photo);
+    }
+    photo.src = dataUrl;
+    photo.style.left = "8%";
+    photo.style.top = "8%";
+    photo.style.width = "44%";
+    photo.style.height = "auto";
+    photo.style.maxHeight = "34%";
+    photo.style.position = "absolute";
+    photo.style.zIndex = "5";
+    invalidatePosterCanvas();
+  };
+  assistantPhotoInput.addEventListener("change", async () => {
+    const file = assistantPhotoInput.files?.[0];
     if (!file) return;
     if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
-      posterPhotoInput.value = "";
-      statusMessage.textContent = "Choisissez une image PNG, JPG ou WebP de 5 Mo maximum.";
+      assistantPhotoInput.value = "";
+      assistantFeedback.textContent = "Choisis une image PNG, JPG ou WebP de 5 Mo maximum.";
       return;
     }
-    statusMessage.textContent = "Optimisation de la photo…";
+    assistantFeedback.textContent = "Préparation de ton image…";
     try {
-      selectedPhotoData = await compressPhotoForStorage(file);
-      selectedPhotoUrl = selectedPhotoData;
-      let photo = poster.querySelector(".user-poster-photo");
-      if (!photo) {
-        photo = document.createElement("img");
-        photo.className = "user-poster-photo";
-        photo.alt = "Photo ajoutée à l’affiche";
-        poster.prepend(photo);
-      }
-      photo.src = selectedPhotoData;
-      photo.style.left = "8%";
-      photo.style.top = "8%";
-      photo.style.width = "44%";
-      photo.style.height = "auto";
-      photo.style.maxHeight = "34%";
-      photo.style.position = "absolute";
-      photo.style.zIndex = "5";
-      poster.hidden = false;
-      emptyPreview.hidden = true;
-      invalidatePosterCanvas();
-      statusMessage.textContent = "Photo optimisée. Elle sera conservée avec l’affiche enregistrée.";
+      assistantPhotoData = await compressPhotoForStorage(file);
+      assistantImageThumbnail.src = assistantPhotoData;
+      assistantImageName.textContent = file.name;
+      assistantImagePreview.hidden = false;
+      assistantFeedback.textContent = "Image ajoutée. L’IA pourra s’en inspirer.";
     } catch (error) {
-      console.error("Préparation de la photo impossible", error);
-      statusMessage.textContent = "Impossible de préparer cette photo. Essayez un autre fichier.";
+      console.error("Préparation de l’image impossible", error);
+      assistantFeedback.textContent = "Impossible de préparer cette image. Essaie un autre fichier.";
     }
   });
+  assistantImageRemove.addEventListener("click", () => {
+    assistantPhotoData = null;
+    assistantPhotoInput.value = "";
+    assistantImageThumbnail.removeAttribute("src");
+    assistantImagePreview.hidden = true;
+    assistantFeedback.textContent = "Image retirée.";
+  });
+
 
   let draggedPhoto = null;
   let photoDragOrigin = null;
@@ -520,12 +534,19 @@ if (form) {
     assistantFeedback.textContent = "L’assistant réfléchit à une vraie proposition publicitaire…";
     try {
       const { data, error } = await cloudClient.functions.invoke("poster-copywriter", {
-        body: { idea },
+        body: { idea, imageData: assistantPhotoData, addImageToPoster: Boolean(addImageToPoster?.checked) },
       });
       if (error) throw error;
       if (!data?.copy) throw new Error(data?.error || "Réponse IA invalide.");
 
       const copy = data.copy;
+      if (assistantPhotoData && addImageToPoster?.checked) {
+        applyPhotoToPoster(assistantPhotoData);
+      } else if (assistantPhotoData && !addImageToPoster?.checked) {
+        poster.querySelector(".user-poster-photo")?.remove();
+        selectedPhotoData = null;
+        invalidatePosterCanvas();
+      }
       const setValue = (selector, value) => {
         const field = document.querySelector(selector);
         if (field) field.value = typeof value === "string" ? value : "";
@@ -551,7 +572,11 @@ if (form) {
         return;
       }
       form.requestSubmit();
-      assistantFeedback.textContent = "Proposition rédigée par l’IA. Relisez les informations, puis modifiez librement votre affiche.";
+      assistantFeedback.textContent = assistantPhotoData
+        ? (addImageToPoster.checked
+          ? "L’IA a analysé ton image et l’a ajoutée à l’affiche. Tu peux la déplacer dans l’aperçu."
+          : "L’IA s’est inspirée de ton image pour préparer le style de l’affiche.")
+        : "Proposition rédigée par l’IA. Relis les informations, puis modifie librement ton affiche.";
       statusMessage.textContent = "Votre affiche a été préparée par l’assistant IA.";
       document.querySelector("#preview-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
