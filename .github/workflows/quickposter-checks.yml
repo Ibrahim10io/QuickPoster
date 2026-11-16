@@ -47,21 +47,35 @@ jobs:
           mkdir -p visual-preview
           node --input-type=module <<'NODE'
           import { chromium } from 'playwright';
+          const fs = await import('node:fs');
+          const { spawn } = await import('node:child_process');
+          const server = spawn('python3', ['-m', 'http.server', '4173', '--directory', 'docs'], { stdio: 'ignore' });
           const browser = await chromium.launch({ headless: true });
           const errors = [];
-          for (const viewport of [
-            { name: 'desktop', width: 1440, height: 1000 },
-            { name: 'mobile', width: 390, height: 844 }
-          ]) {
-            const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: 1 });
-            page.on('pageerror', error => errors.push(viewport.name + ': ' + error.message));
-            await page.goto('https://ibrahim10io.github.io/QuickPoster/?visual-check=' + Date.now() + '#nouvelle-affiche', { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await page.waitForTimeout(5000);
-            await page.screenshot({ path: 'visual-preview/' + viewport.name + '.png', fullPage: true });
-            await page.close();
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            for (const viewport of [
+              { name: 'desktop', width: 1440, height: 1000 },
+              { name: 'mobile', width: 390, height: 844 }
+            ]) {
+              const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: 1 });
+              page.on('pageerror', error => errors.push(viewport.name + ': ' + error.message));
+              await page.goto('http://127.0.0.1:4173/#nouvelle-affiche', { waitUntil: 'domcontentloaded', timeout: 30000 });
+              await page.waitForTimeout(2500);
+              const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+              if (overflow) errors.push(viewport.name + ': débordement horizontal détecté');
+              await page.screenshot({ path: 'visual-preview/' + viewport.name + '.png', fullPage: true });
+              await page.locator('[data-route="accueil"]').click();
+              await page.waitForTimeout(250);
+              if (!(await page.locator('[data-view="accueil"]').isVisible())) errors.push(viewport.name + ': navigation accueil défaillante');
+              await page.screenshot({ path: 'visual-preview/' + viewport.name + '-accueil.png', fullPage: true });
+              await page.close();
+            }
+          } finally {
+            await browser.close();
+            server.kill();
           }
-          await browser.close();
-          await import('node:fs').then(fs => fs.writeFileSync('visual-preview/page-errors.txt', errors.length ? errors.join('\n') : 'Aucune erreur JavaScript non gérée détectée.'));
+          fs.writeFileSync('visual-preview/page-errors.txt', errors.length ? errors.join('\n') : 'Aucune erreur JavaScript non gérée, aucun débordement horizontal, navigation accueil OK.');
           NODE
       - name: Upload visual preview
         uses: actions/upload-artifact@v4
