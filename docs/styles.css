@@ -2763,3 +2763,26 @@ body:not([data-theme="light"]) .studio-view .preview-empty .empty-icon {
 body:not([data-theme="light"]) .studio-view .preview-export-actions {
   border-color:#2b354a;
 }
+
+/* En mode sombre, le bandeau d'introduction du studio reste clair. */
+body:not([data-theme="light"]) .studio-view > .intro {
+  background:#f7f7f4;
+  border:1px solid #e5e2da;
+  border-radius:16px;
+  padding:24px 26px;
+  color:#202b3d;
+}
+body:not([data-theme="light"]) .studio-view > .intro h1,
+body:not([data-theme="light"]) .studio-view > .intro .intro-copy,
+body:not([data-theme="light"]) .studio-view > .intro .step-indicator {
+  color:#202b3d;
+}
+body:not([data-theme="light"]) .studio-view > .intro h1 span {
+  color:#315BFF;
+}
+body:not([data-theme="light"]) .studio-view > .intro .eyebrow {
+  color:#596579;
+}
+body:not([data-theme="light"]) .studio-view > .intro .step-number {
+  color:#315BFF;
+}
