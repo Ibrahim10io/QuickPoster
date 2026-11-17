@@ -2807,3 +2807,23 @@ body:not([data-theme="light"]) .studio-view > .intro .eyebrow-dot {
   background:#7898ff;
   box-shadow:0 0 0 3px rgba(120,152,255,.18);
 }
+
+/* Correctif prioritaire : fond du bandeau d'introduction en vrai mode sombre. */
+body[data-theme="dark"] .studio-view > section.intro {
+  background-color:#151b29 !important;
+  background-image:none !important;
+  border-color:#2a3448 !important;
+  color:#ffffff !important;
+}
+body[data-theme="dark"] .studio-view > section.intro h1,
+body[data-theme="dark"] .studio-view > section.intro h1 span,
+body[data-theme="dark"] .studio-view > section.intro .intro-copy,
+body[data-theme="dark"] .studio-view > section.intro .eyebrow,
+body[data-theme="dark"] .studio-view > section.intro .step-indicator,
+body[data-theme="dark"] .studio-view > section.intro .step-number {
+  color:#ffffff !important;
+}
+body[data-theme="dark"] .studio-view > section.intro .step-indicator {
+  background:#202a3d !important;
+  border-color:#35435e !important;
+}
