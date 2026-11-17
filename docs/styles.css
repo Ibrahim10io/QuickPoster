@@ -2730,3 +2730,36 @@ body[data-theme="light"] #assist-poster-text:focus {
   outline:2px solid rgba(49,91,255,.15);
   outline-offset:1px;
 }
+
+
+/* Mode sombre : toute la zone de previsualisation de l'affiche reste sombre. */
+body:not([data-theme="light"]) .studio-view .preview-panel {
+  background:#151b29;
+  border-color:#2a3448;
+  color:#e8edf8;
+}
+body:not([data-theme="light"]) .studio-view .poster-stage {
+  background-color:#101624;
+  background-image:radial-gradient(#303b52 .85px,transparent .85px);
+  border-color:#2b354a;
+}
+body:not([data-theme="light"]) .studio-view .preview-label {
+  color:#b8c5e3;
+  background:#202a3d;
+  border-color:#35435e;
+}
+body:not([data-theme="light"]) .studio-view .edit-hint,
+body:not([data-theme="light"]) .studio-view .preview-empty p {
+  color:#c2cce0;
+}
+body:not([data-theme="light"]) .studio-view .preview-empty>span:last-child {
+  color:#8998b5;
+}
+body:not([data-theme="light"]) .studio-view .preview-empty .empty-icon {
+  color:#9ab0ff;
+  background:#202c48;
+  border-color:#354a78;
+}
+body:not([data-theme="light"]) .studio-view .preview-export-actions {
+  border-color:#2b354a;
+}
