@@ -2786,3 +2786,24 @@ body:not([data-theme="light"]) .studio-view > .intro .eyebrow {
 body:not([data-theme="light"]) .studio-view > .intro .step-number {
   color:#315BFF;
 }
+
+/* Mode sombre : bandeau d'introduction sombre avec tous les textes en blanc. */
+body:not([data-theme="light"]) .studio-view > .intro {
+  background:#151b29;
+  border:1px solid #2a3448;
+  border-radius:16px;
+  padding:24px 26px;
+  color:#fff;
+}
+body:not([data-theme="light"]) .studio-view > .intro h1,
+body:not([data-theme="light"]) .studio-view > .intro h1 span,
+body:not([data-theme="light"]) .studio-view > .intro .intro-copy,
+body:not([data-theme="light"]) .studio-view > .intro .step-indicator,
+body:not([data-theme="light"]) .studio-view > .intro .eyebrow,
+body:not([data-theme="light"]) .studio-view > .intro .step-number {
+  color:#fff;
+}
+body:not([data-theme="light"]) .studio-view > .intro .eyebrow-dot {
+  background:#7898ff;
+  box-shadow:0 0 0 3px rgba(120,152,255,.18);
+}
