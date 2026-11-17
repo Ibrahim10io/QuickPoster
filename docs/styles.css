@@ -2827,3 +2827,17 @@ body[data-theme="dark"] .studio-view > section.intro .step-indicator {
   background:#202a3d !important;
   border-color:#35435e !important;
 }
+
+/* Fond general de la page Studio : evite le grand aplat blanc en mode sombre. */
+body[data-theme="dark"] .page-container:has(.studio-view:not([hidden])) {
+  background:#0f1420 !important;
+}
+body[data-theme="dark"] .page-container:has(.studio-view:not([hidden])) .studio-view {
+  background:transparent !important;
+}
+body[data-theme="dark"] .page-container:has(.studio-view:not([hidden])) .studio-view > section.intro {
+  background:#151b29 !important;
+  background-image:none !important;
+  border:1px solid #2a3448 !important;
+  color:#fff !important;
+}
