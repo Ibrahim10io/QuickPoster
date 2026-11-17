@@ -13,6 +13,12 @@
     <script src="auth.js?v=theme-quick-toggle-1" defer></script>
   </head>
   <body>
+    <script>
+      (() => {
+        const savedTheme = localStorage.getItem("quickposter-theme");
+        document.body.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+      })();
+    </script>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Barre latérale">
         <a class="brand" href="#accueil" aria-label="QUICKPOSTER, accueil">
