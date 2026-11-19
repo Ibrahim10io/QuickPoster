@@ -65,7 +65,10 @@ jobs:
               const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
               if (overflow) errors.push(viewport.name + ': débordement horizontal détecté');
               await page.screenshot({ path: 'visual-preview/' + viewport.name + '.png', fullPage: true });
-              await page.locator('[data-route="accueil"]').click();
+              if (viewport.width <= 760) {
+                await page.locator('#mobile-menu-toggle').click();
+              }
+              await page.locator('[data-route="accueil"]:visible').click();
               await page.waitForTimeout(250);
               if (!(await page.locator('[data-view="accueil"]').isVisible())) errors.push(viewport.name + ': navigation accueil défaillante');
               await page.screenshot({ path: 'visual-preview/' + viewport.name + '-accueil.png', fullPage: true });
