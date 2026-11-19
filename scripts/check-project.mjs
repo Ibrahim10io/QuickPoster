@@ -20,6 +20,11 @@ const checks = [
   ["Poster creations can be saved to Supabase", app.includes('.from("creations")') && app.includes("saveCloudCreation")],
   ["Cloud records are queried for the signed-in user", app.includes('.eq("user_id", user.id)')],
   ["Local fallback remains available", app.includes("localStorage")],
+  ["Verification-code resend button is restored after errors", auth.includes("finally {\n      resendButton.disabled = false;")],
+  ["Profile form handles update failures", auth.includes('showStatus(error.message || "Impossible d’enregistrer le profil.", true);')],
+  ["Password form handles update failures", auth.includes('showStatus(error.message || "Impossible de modifier le mot de passe.", true);')],
+  ["Profile and password updates require an active user", (auth.match(/if \(!currentUser\) return;/g) || []).length >= 2],
+  ["Creation titles are rendered as text, not HTML", app.includes('createTextElement("h2", "creation-card-title", creation.title)')],
 ];
 
 let failed = 0;
