@@ -170,17 +170,62 @@ const templateNames = {
 };
 const posterTextFields = ["businessName", "businessType", "headline", "description", "product", "promotion", "price", "contact"];
 
+function normalizeCreation(creation) {
+  if (!creation || typeof creation !== "object" || Array.isArray(creation)) return null;
+  if (typeof creation.id !== "string" || !creation.id || typeof creation.title !== "string") return null;
+
+  const texts = Object.fromEntries(posterTextFields.map((field) => [
+    field,
+    typeof creation.texts?.[field] === "string" ? creation.texts[field].slice(0, 5000) : "",
+  ]));
+  const safeColor = (value, fallback) => /^#[\\da-f]{6}$/i.test(value || "") ? value : fallback;
+  const colors = {
+    background: safeColor(creation.colors?.background, "#ffffff"),
+    text: safeColor(creation.colors?.text, "#292c25"),
+    accent: safeColor(creation.colors?.accent, "#222222"),
+    secondary: safeColor(creation.colors?.secondary, "#686d62"),
+  };
+  const template = Object.hasOwn(templateNames, creation.template) ? creation.template : "atelier";
+  const createdAt = typeof creation.createdAt === "string" && !Number.isNaN(Date.parse(creation.createdAt))
+    ? creation.createdAt
+    : new Date(0).toISOString();
+
+  let photo = null;
+  const candidate = creation.photo;
+  if (
+    candidate &&
+    typeof candidate.data === "string" &&
+    candidate.data.length <= 5 * 1024 * 1024 &&
+    /^data:image\\/(?:jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(candidate.data)
+  ) {
+    const finite = (value, fallback, min, max) => {
+      const number = Number(value);
+      return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+    };
+    photo = {
+      data: candidate.data,
+      left: finite(candidate.left, 8, 0, 100),
+      top: finite(candidate.top, 8, 0, 100),
+      width: finite(candidate.width, 44, 1, 100),
+    };
+  }
+
+  return {
+    id: creation.id.slice(0, 128),
+    title: creation.title.slice(0, 200),
+    subtitle: typeof creation.subtitle === "string" ? creation.subtitle.slice(0, 500) : "",
+    texts,
+    template,
+    colors,
+    photo,
+    createdAt,
+  };
+}
+
 function readCreations() {
   try {
     const stored = JSON.parse(window.localStorage.getItem(getStorageKey()) || "[]");
-    return Array.isArray(stored) ? stored.filter((creation) => (
-      creation &&
-      typeof creation.id === "string" &&
-      typeof creation.title === "string" &&
-      typeof creation.createdAt === "string" &&
-      creation.texts &&
-      creation.colors
-    )) : [];
+    return Array.isArray(stored) ? stored.map(normalizeCreation).filter(Boolean) : [];
   } catch {
     return [];
   }
