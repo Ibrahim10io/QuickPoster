@@ -30,8 +30,8 @@ const checks = [
   ["Creation titles are rendered as text, not HTML", app.includes('createTextElement("h2", "creation-card-title", creation.title)')],
   ["Saved creations are normalized before use", app.includes("function normalizeCreation(creation)") && app.includes("stored.map(normalizeCreation).filter(Boolean)")],
   ["Saved template names are restricted to known templates", app.includes('Object.hasOwn(templateNames, creation.template) ? creation.template : "atelier"')],
-  ["Saved colors accept only six-digit hex values", app.includes('/^#[\\\\da-f]{6}$/i.test(value || "")')],
-  ["Saved photo data is restricted to bounded image data URLs", app.includes("candidate.data.length <= 5 * 1024 * 1024") && app.includes("/^data:image\\\\/(?:jpeg|png|webp);base64,")],
+  ["Saved colors accept only six-digit hex values", app.includes('/^#[\\da-f]{6}$/i.test(value || "")')],
+  ["Saved photo data is restricted to bounded image data URLs", app.includes("candidate.data.length <= 5 * 1024 * 1024") && app.includes("/^data:image\\/(?:jpeg|png|webp);base64,")],
   ["Saved photo positions are finite and clamped", app.includes("Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback")],
 ];
 
