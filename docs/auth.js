@@ -348,7 +348,7 @@
       showStatus("Impossible de vérifier la session.", true);
       return;
     }
-    if (data?.session?.user) updateAccount(data.session.user);
+    updateAccount(data?.session?.user || null);
   }
 
   client.auth.getSession().then(({ data, error }) => {
