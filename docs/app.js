@@ -7,6 +7,9 @@ const routes = {
 
 
 const storageKey = "quickposter.creations.v1";
+function getStorageKey() {
+  return cloudUser?.id ? `${storageKey}.user.${cloudUser.id}` : storageKey;
+}
 const cloudConfig = {
   url: "https://yhghivyejpavymjcbqnr.supabase.co",
   publishableKey: "sb_publishable_tsG8rK7NjTU6HsMTtVM2qw_-k0MIZAi",
@@ -59,7 +62,7 @@ async function loadCloudCreations(user) {
   if (error) throw error;
   if (version !== cloudSyncVersion || cloudUser?.id !== user.id) return;
   const creations = (data || []).map(fromCloudCreation);
-  window.localStorage.setItem(storageKey, JSON.stringify(creations));
+  window.localStorage.setItem(getStorageKey(), JSON.stringify(creations));
   renderSavedCreations();
 }
 
@@ -99,13 +102,11 @@ if (cloudClient) {
     if (nextUser?.id !== cloudUser?.id) {
       cloudUser = nextUser;
       cloudSyncVersion += 1;
-      // Ne jamais laisser les créations de l'ancien compte visibles pendant le changement.
-      window.localStorage.removeItem(storageKey);
+      // Chaque compte possède son propre cache local, séparé des créations anonymes.
       renderSavedCreations();
       if (cloudUser) {
         loadCloudCreations(cloudUser).catch((error) => {
           console.error("Synchronisation QUICKPOSTER impossible", error);
-          window.localStorage.removeItem(storageKey);
           renderSavedCreations();
         });
       }
@@ -171,7 +172,7 @@ const posterTextFields = ["businessName", "businessType", "headline", "descripti
 
 function readCreations() {
   try {
-    const stored = JSON.parse(window.localStorage.getItem(storageKey) || "[]");
+    const stored = JSON.parse(window.localStorage.getItem(getStorageKey()) || "[]");
     return Array.isArray(stored) ? stored.filter((creation) => (
       creation &&
       typeof creation.id === "string" &&
@@ -338,7 +339,7 @@ window.addEventListener("hashchange", renderRoute);
 renderRoute();
 renderSavedCreations();
 window.addEventListener("storage", (event) => {
-  if (event.key === storageKey) renderSavedCreations();
+  if (event.key === getStorageKey()) renderSavedCreations();
 });
 
 const form = document.querySelector("#poster-form");
@@ -1232,7 +1233,7 @@ if (form) {
       if ((cloudUser?.id || null) !== saveUserId) {
         throw new Error("Le compte a changé pendant l’enregistrement.");
       }
-      window.localStorage.setItem(storageKey, JSON.stringify(nextCreations));
+      window.localStorage.setItem(getStorageKey(), JSON.stringify(nextCreations));
       activeCreationId = creation.id;
       setSaveButtonLabel();
       renderSavedCreations();
@@ -1318,7 +1319,7 @@ if (form) {
       if ((cloudUser?.id || null) !== deleteUserId) {
         throw new Error("Le compte a changé pendant la suppression.");
       }
-      window.localStorage.setItem(storageKey, JSON.stringify(
+      window.localStorage.setItem(getStorageKey(), JSON.stringify(
         creations.filter((item) => item.id !== creation.id),
       ));
       if (activeCreationId === creation.id) {
