@@ -5,6 +5,21 @@
   };
 
   const $ = (selector) => document.querySelector(selector);
+  const getLocalPreference = (key, fallback) => {
+    try {
+      return window.localStorage.getItem(key) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  const setLocalPreference = (key, value) => {
+    try {
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch {
+      return false;
+    }
+  };
   const dialog = $("#auth-dialog");
   const openButton = $("#auth-open-button");
   const loginButton = $("#auth-login-button");
@@ -112,8 +127,8 @@
       ? new Date(user.created_at).toLocaleDateString("fr-FR", { dateStyle: "long" })
       : "Non disponible";
     $("#privacy-verified").textContent = user.email_confirmed_at ? "Oui" : "En attente";
-    $("#theme-toggle").checked = localStorage.getItem("quickposter-theme") === "light";
-    $("#email-notifications-toggle").checked = localStorage.getItem("quickposter-email-notifications") === "true";
+    $("#theme-toggle").checked = getLocalPreference("quickposter-theme", "dark") === "light";
+    $("#email-notifications-toggle").checked = getLocalPreference("quickposter-email-notifications", "false") === "true";
   }
 
   function updateAccount(user) {
@@ -322,7 +337,7 @@
   const quickThemeToggle = $("#theme-quick-toggle");
   const applyTheme = (theme) => {
     document.body.dataset.theme = theme;
-    localStorage.setItem("quickposter-theme", theme);
+    setLocalPreference("quickposter-theme", theme);
     $("#theme-toggle").checked = theme === "light";
     if (quickThemeToggle) {
       const nextLabel = theme === "light" ? "Activer le thème sombre" : "Activer le thème clair";
@@ -343,11 +358,11 @@
   });
 
   $("#email-notifications-toggle").addEventListener("change", (event) => {
-    localStorage.setItem("quickposter-email-notifications", String(event.target.checked));
+    setLocalPreference("quickposter-email-notifications", String(event.target.checked));
     showStatus("Préférence enregistrée sur cet appareil. Les e-mails automatiques ne sont pas encore activés.");
   });
 
-  applyTheme(localStorage.getItem("quickposter-theme") || "dark");
+  applyTheme(getLocalPreference("quickposter-theme", "dark"));
 
   signoutButton.addEventListener("click", async () => {
     signoutButton.disabled = true;
