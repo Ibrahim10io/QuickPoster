@@ -351,33 +351,33 @@
 
   signoutButton.addEventListener("click", async () => {
     signoutButton.disabled = true;
-    const { error } = await client.auth.signOut();
-    signoutButton.disabled = false;
-    if (error) {
+    try {
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
+      emailInput.value = "";
+      passwordInput.value = "";
+      setMode("login");
+      updateAccount(null);
+      showStatus("Vous êtes déconnecté.");
+      closeAuthDialog();
+    } catch (error) {
       showStatus(error.message || "La déconnexion a échoué.", true);
-      return;
+    } finally {
+      signoutButton.disabled = false;
     }
-    emailInput.value = "";
-    passwordInput.value = "";
-    setMode("login");
-    updateAccount(null);
-    showStatus("Vous êtes déconnecté.");
-    closeAuthDialog();
   });
 
   async function refreshSession() {
-    const { data, error } = await client.auth.getSession();
-    if (error) {
-      showStatus("Impossible de vérifier la session.", true);
-      return;
+    try {
+      const { data, error } = await client.auth.getSession();
+      if (error) throw error;
+      updateAccount(data?.session?.user || null);
+    } catch (error) {
+      showStatus(error.message || "Impossible de vérifier la session.", true);
     }
-    updateAccount(data?.session?.user || null);
   }
 
-  client.auth.getSession().then(({ data, error }) => {
-    if (error) showStatus("Impossible de vérifier la session.", true);
-    updateAccount(data?.session?.user || null);
-  });
+  refreshSession();
 
   client.auth.onAuthStateChange((event, session) => {
     updateAccount(session?.user || null);
