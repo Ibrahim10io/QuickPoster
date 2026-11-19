@@ -2888,3 +2888,17 @@ body[data-theme="dark"] .studio-view .assistant-image-toggle {
   border-color:#35435e !important;
   color:#e8edf8 !important;
 }
+
+
+/* Le conteneur autour du compositeur IA ne doit pas rester blanc en mode sombre. */
+body[data-theme="dark"] .studio-view .method-panel,
+body[data-theme="dark"] .studio-view #assist-method-panel {
+  background:#101624 !important;
+  border:1px solid #2a3448 !important;
+  color:#e8edf8 !important;
+  box-shadow:none !important;
+}
+body[data-theme="dark"] .studio-view .assistant-composer {
+  background:linear-gradient(145deg,#1b2930,#17212b) !important;
+  border-color:#344b50 !important;
+}
