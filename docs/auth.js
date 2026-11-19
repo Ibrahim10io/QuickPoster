@@ -265,9 +265,15 @@
 
   resendButton.addEventListener("click", async () => {
     resendButton.disabled = true;
-    const { error } = await client.auth.resend({ type: "signup", email: emailInput.value.trim(), options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/" } });
-    resendButton.disabled = false;
-    showStatus(error ? (error.message || "Impossible de demander un nouvel envoi.") : "Demande de renvoi acceptée. La réception du message n’est pas encore confirmée.");
+    try {
+      const { error } = await client.auth.resend({ type: "signup", email: emailInput.value.trim(), options: { emailRedirectTo: "https://ibrahim10io.github.io/QuickPoster/" } });
+      if (error) throw error;
+      showStatus("Demande de renvoi acceptée. La réception du message n’est pas encore confirmée.");
+    } catch (error) {
+      showStatus(error.message || "Impossible de demander un nouvel envoi.", true);
+    } finally {
+      resendButton.disabled = false;
+    }
   });
 
   $("#profile-form").addEventListener("submit", async (event) => {
@@ -275,25 +281,42 @@
     if (!currentUser) return;
     const firstName = $("#profile-first-name").value.trim();
     const lastName = $("#profile-last-name").value.trim();
-    const { data, error } = await client.auth.updateUser({
-      data: { ...(currentUser.user_metadata || {}), first_name: firstName, last_name: lastName, full_name: [firstName, lastName].filter(Boolean).join(" ") }
-    });
-    if (error) return showStatus(error.message || "Impossible d’enregistrer le profil.", true);
-    updateAccount(data.user);
-    activateSettingsTab("profile");
-    showStatus("Profil enregistré.");
+    const submit = event.currentTarget.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
+    try {
+      const { data, error } = await client.auth.updateUser({
+        data: { ...(currentUser.user_metadata || {}), first_name: firstName, last_name: lastName, full_name: [firstName, lastName].filter(Boolean).join(" ") }
+      });
+      if (error) throw error;
+      updateAccount(data.user);
+      activateSettingsTab("profile");
+      showStatus("Profil enregistré.");
+    } catch (error) {
+      showStatus(error.message || "Impossible d’enregistrer le profil.", true);
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   });
 
   $("#password-form").addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (!currentUser) return;
     const nextPassword = $("#new-password").value;
     const confirmation = $("#confirm-password").value;
     if (nextPassword.length < 8) return showStatus("Le mot de passe doit contenir au moins 8 caractères.", true);
     if (nextPassword !== confirmation) return showStatus("Les deux mots de passe ne correspondent pas.", true);
-    const { error } = await client.auth.updateUser({ password: nextPassword });
-    if (error) return showStatus(error.message || "Impossible de modifier le mot de passe.", true);
-    $("#password-form").reset();
-    showStatus("Mot de passe mis à jour.");
+    const submit = event.currentTarget.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
+    try {
+      const { error } = await client.auth.updateUser({ password: nextPassword });
+      if (error) throw error;
+      $("#password-form").reset();
+      showStatus("Mot de passe mis à jour.");
+    } catch (error) {
+      showStatus(error.message || "Impossible de modifier le mot de passe.", true);
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   });
 
   const quickThemeToggle = $("#theme-quick-toggle");
