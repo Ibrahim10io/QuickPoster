@@ -24,6 +24,9 @@ const checks = [
   ["Profile form handles update failures", auth.includes('showStatus(error.message || "Impossible d’enregistrer le profil.", true);')],
   ["Password form handles update failures", auth.includes('showStatus(error.message || "Impossible de modifier le mot de passe.", true);')],
   ["Profile and password updates require an active user", (auth.match(/if \(!currentUser\) return;/g) || []).length >= 2],
+  ["Sign-out button is restored after network errors", auth.includes("finally {\n      signoutButton.disabled = false;")],
+  ["Session refresh handles rejected requests", auth.includes("async function refreshSession()") && auth.includes('showStatus(error.message || "Impossible de vérifier la session.", true);')],
+  ["Initial session is loaded through the guarded refresh function", auth.includes("  refreshSession();")],
   ["Creation titles are rendered as text, not HTML", app.includes('createTextElement("h2", "creation-card-title", creation.title)')],
 ];
 
