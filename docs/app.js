@@ -178,7 +178,7 @@ function normalizeCreation(creation) {
     field,
     typeof creation.texts?.[field] === "string" ? creation.texts[field].slice(0, 5000) : "",
   ]));
-  const safeColor = (value, fallback) => /^#[\\da-f]{6}$/i.test(value || "") ? value : fallback;
+  const safeColor = (value, fallback) => /^#[\da-f]{6}$/i.test(value || "") ? value : fallback;
   const colors = {
     background: safeColor(creation.colors?.background, "#ffffff"),
     text: safeColor(creation.colors?.text, "#292c25"),
@@ -196,7 +196,7 @@ function normalizeCreation(creation) {
     candidate &&
     typeof candidate.data === "string" &&
     candidate.data.length <= 5 * 1024 * 1024 &&
-    /^data:image\\/(?:jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(candidate.data)
+    /^data:image\/(?:jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(candidate.data)
   ) {
     const finite = (value, fallback, min, max) => {
       const number = Number(value);
