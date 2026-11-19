@@ -84,6 +84,8 @@ jobs:
                 photo: { data: 'data:image/svg+xml,<svg onload=alert(1)>', left: 'NaN', top: -500, width: 900 },
                 createdAt: new Date().toISOString()
               }])), hostileTitle);
+              // Reload so the app re-reads the deliberately injected localStorage fixture.
+              await page.reload({ waitUntil: 'domcontentloaded' });
               await page.goto('http://127.0.0.1:4173/#mes-creations', { waitUntil: 'domcontentloaded' });
               await page.waitForTimeout(500);
               if (await page.locator('.creation-card').count() !== 1) errors.push(viewport.name + ': données sauvegardées non affichées');
