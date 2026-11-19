@@ -27,6 +27,8 @@ const checks = [
   ["Sign-out button is restored after network errors", auth.includes("finally {\n      signoutButton.disabled = false;")],
   ["Session refresh handles rejected requests", auth.includes("async function refreshSession()") && auth.includes('showStatus(error.message || "Impossible de vérifier la session.", true);')],
   ["Initial session is loaded through the guarded refresh function", auth.includes("  refreshSession();")],
+  ["Preference reads tolerate unavailable browser storage", auth.includes("const getLocalPreference = (key, fallback)") && auth.includes("return fallback;")],
+  ["Preference writes tolerate storage quota or access errors", auth.includes("const setLocalPreference = (key, value)") && auth.includes("return false;")],
   ["Creation titles are rendered as text, not HTML", app.includes('createTextElement("h2", "creation-card-title", creation.title)')],
   ["Saved creations are normalized before use", app.includes("function normalizeCreation(creation)") && app.includes("stored.map(normalizeCreation).filter(Boolean)")],
   ["Saved template names are restricted to known templates", app.includes('Object.hasOwn(templateNames, creation.template) ? creation.template : "atelier"')],
