@@ -71,6 +71,40 @@ jobs:
               await page.locator('[data-route="accueil"]:visible').click();
               await page.waitForTimeout(250);
               if (!(await page.locator('[data-view="accueil"]').isVisible())) errors.push(viewport.name + ': navigation accueil défaillante');
+
+              // Verify hostile/corrupt saved data is rendered as inert text and normalized.
+              const hostileTitle = '<img src=x onerror="window.__quickposterXss=true">';
+              await page.evaluate((title) => localStorage.setItem('quickposter.creations.v1', JSON.stringify([{
+                id: 'visual-hostile-test',
+                title,
+                subtitle: '<script>bad()</script>',
+                texts: { businessName: title, businessType: 'Test', product: 'Produit' },
+                template: '"><script>bad()</script>',
+                colors: { background: 'url(javascript:alert(1))', accent: '#123456' },
+                photo: { data: 'data:image/svg+xml,<svg onload=alert(1)>', left: 'NaN', top: -500, width: 900 },
+                createdAt: new Date().toISOString()
+              }])), hostileTitle);
+              await page.goto('http://127.0.0.1:4173/#mes-creations', { waitUntil: 'domcontentloaded' });
+              await page.waitForTimeout(500);
+              if (await page.locator('.creation-card').count() !== 1) errors.push(viewport.name + ': données sauvegardées non affichées');
+              if ((await page.locator('.creation-card-title').textContent()) !== hostileTitle) errors.push(viewport.name + ': texte utilisateur mal échappé');
+              if (await page.evaluate(() => window.__quickposterXss === true)) errors.push(viewport.name + ': contenu utilisateur exécuté');
+              const normalized = await page.evaluate(() => JSON.parse(localStorage.getItem('quickposter.creations.v1') || '[]')[0]);
+              if (normalized?.template !== 'atelier' || normalized?.photo !== null || normalized?.colors?.background !== '#ffffff') errors.push(viewport.name + ': normalisation des données sauvegardées défaillante');
+
+              // Verify the complete local create/save/list flow without an account.
+              await page.evaluate(() => localStorage.removeItem('quickposter.creations.v1'));
+              await page.goto('http://127.0.0.1:4173/#nouvelle-affiche', { waitUntil: 'domcontentloaded' });
+              await page.locator('#business-name').fill('Commerce test');
+              await page.locator('#business-type').fill('Boutique');
+              await page.locator('#product').fill('Produit test');
+              await page.locator('#poster-form button[type="submit"]').click();
+              await page.locator('#poster:not([hidden])').waitFor({ timeout: 10000 });
+              await page.locator('#save-creation').click();
+              await page.waitForFunction(() => JSON.parse(localStorage.getItem('quickposter.creations.v1') || '[]').length === 1, null, { timeout: 10000 });
+              await page.goto('http://127.0.0.1:4173/#mes-creations', { waitUntil: 'domcontentloaded' });
+              if (await page.locator('.creation-card-title').textContent() !== 'Commerce test') errors.push(viewport.name + ': sauvegarde locale impossible');
+
               await page.screenshot({ path: 'visual-preview/' + viewport.name + '-accueil.png', fullPage: true });
               await page.close();
             }
