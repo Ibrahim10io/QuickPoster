@@ -63,23 +63,33 @@ async function loadCloudCreations(user) {
   renderSavedCreations();
 }
 
-async function saveCloudCreation(creation) {
-  if (!cloudClient || !cloudUser) return false;
+async function saveCloudCreation(creation, expectedUserId) {
+  if (!cloudClient || !expectedUserId || cloudUser?.id !== expectedUserId) {
+    throw new Error("Le compte a changé pendant l’enregistrement.");
+  }
   const { error } = await cloudClient
     .from("creations")
-    .upsert(toCloudCreation(creation, cloudUser.id), { onConflict: "id" });
+    .upsert(toCloudCreation(creation, expectedUserId), { onConflict: "id" });
   if (error) throw error;
+  if (cloudUser?.id !== expectedUserId) {
+    throw new Error("Le compte a changé pendant l’enregistrement.");
+  }
   return true;
 }
 
-async function deleteCloudCreation(creationId) {
-  if (!cloudClient || !cloudUser) return false;
+async function deleteCloudCreation(creationId, expectedUserId) {
+  if (!cloudClient || !expectedUserId || cloudUser?.id !== expectedUserId) {
+    throw new Error("Le compte a changé pendant la suppression.");
+  }
   const { error } = await cloudClient
     .from("creations")
     .delete()
     .eq("id", creationId)
-    .eq("user_id", cloudUser.id);
+    .eq("user_id", expectedUserId);
   if (error) throw error;
+  if (cloudUser?.id !== expectedUserId) {
+    throw new Error("Le compte a changé pendant la suppression.");
+  }
   return true;
 }
 
@@ -88,14 +98,16 @@ if (cloudClient) {
     const nextUser = session?.user || null;
     if (nextUser?.id !== cloudUser?.id) {
       cloudUser = nextUser;
+      cloudSyncVersion += 1;
+      // Ne jamais laisser les créations de l'ancien compte visibles pendant le changement.
+      window.localStorage.removeItem(storageKey);
+      renderSavedCreations();
       if (cloudUser) {
         loadCloudCreations(cloudUser).catch((error) => {
           console.error("Synchronisation QUICKPOSTER impossible", error);
+          window.localStorage.removeItem(storageKey);
+          renderSavedCreations();
         });
-      } else {
-        cloudSyncVersion += 1;
-        window.localStorage.removeItem(storageKey);
-        renderSavedCreations();
       }
     }
   });
@@ -1211,11 +1223,15 @@ if (form) {
       : [creation, ...creations];
 
     saveButton.disabled = true;
-    statusMessage.textContent = cloudUser
+    const saveUserId = cloudUser?.id || null;
+    statusMessage.textContent = saveUserId
       ? "Enregistrement sécurisé dans votre compte…"
       : "Enregistrement sur cet appareil…";
     try {
-      if (cloudUser) await saveCloudCreation(creation);
+      if (saveUserId) await saveCloudCreation(creation, saveUserId);
+      if ((cloudUser?.id || null) !== saveUserId) {
+        throw new Error("Le compte a changé pendant l’enregistrement.");
+      }
       window.localStorage.setItem(storageKey, JSON.stringify(nextCreations));
       activeCreationId = creation.id;
       setSaveButtonLabel();
@@ -1296,8 +1312,12 @@ if (form) {
     if (!creation || !window.confirm(`Supprimer « ${creation.title} » ?`)) return;
 
     deleteButton.disabled = true;
+    const deleteUserId = cloudUser?.id || null;
     try {
-      if (cloudUser) await deleteCloudCreation(creation.id);
+      if (deleteUserId) await deleteCloudCreation(creation.id, deleteUserId);
+      if ((cloudUser?.id || null) !== deleteUserId) {
+        throw new Error("Le compte a changé pendant la suppression.");
+      }
       window.localStorage.setItem(storageKey, JSON.stringify(
         creations.filter((item) => item.id !== creation.id),
       ));
