@@ -35,7 +35,7 @@ async function waitForServer() {
 
 async function preparePage(page, options = {}) {
   await page.route(
-    (url) => url.startsWith('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0'),
+    (url) => url.toString().startsWith('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0'),
     (route) => route.fulfill({
       status: 200,
       contentType: 'application/javascript',
@@ -441,6 +441,7 @@ async function testExports() {
     { timeout: 15000 },
   );
 
+  await page.locator('[data-route="mes-creations"]').click();
   const firstCard = page.locator('.creation-card').filter({ hasText: creations[0].title });
   page.once('dialog', (dialog) => dialog.accept());
   await firstCard.locator('[data-delete-creation]').click();
