@@ -24,6 +24,7 @@ jobs:
           node --check docs/app.js
           node --check docs/auth.js
           node --check scripts/check-project.mjs
+          node --check scripts/quickposter-e2e.mjs
       - name: Run QUICKPOSTER project checks
         run: node scripts/check-project.mjs
 
@@ -40,8 +41,8 @@ jobs:
       - name: Install Playwright
         run: |
           npm init -y
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
+          npm install --no-save playwright @axe-core/playwright pdf-lib pngjs
+          npx playwright install --with-deps chromium firefox webkit
       - name: Capture QUICKPOSTER desktop and mobile views
         run: |
           mkdir -p visual-preview
@@ -123,6 +124,8 @@ jobs:
           }
           fs.writeFileSync('visual-preview/page-errors.txt', errors.length ? errors.join('\n') : 'Aucune erreur JavaScript non gérée, aucun débordement horizontal, navigation accueil OK.');
           NODE
+      - name: Run full browser, accessibility and export audit
+        run: node scripts/quickposter-e2e.mjs
       - name: Upload visual preview
         uses: actions/upload-artifact@v4
         with:
