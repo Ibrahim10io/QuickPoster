@@ -2902,3 +2902,19 @@ body[data-theme="dark"] .studio-view .assistant-composer {
   background:linear-gradient(145deg,#1b2930,#17212b) !important;
   border-color:#344b50 !important;
 }
+
+/* Contraste renforcé pour les textes secondaires de l’atelier en thème clair. */
+body[data-theme="light"] .studio-view .image-field-heading label span,
+body[data-theme="light"] .studio-view .image-field-kicker,
+body[data-theme="light"] .studio-view .image-drop-copy small,
+body[data-theme="light"] .studio-view .shared-image-field .assistant-image-help,
+body[data-theme="light"] .studio-view .color-fieldset .optional-label,
+body[data-theme="light"] .studio-view .palette-presets-label,
+body[data-theme="light"] .studio-view .section-kicker,
+body[data-theme="light"] .studio-view .required-note,
+body[data-theme="light"] .studio-view .color-control,
+body[data-theme="light"] .studio-view .privacy-note,
+body[data-theme="light"] .studio-view .field input::placeholder,
+body[data-theme="light"] .studio-view .field textarea::placeholder {
+  color: #536257 !important;
+}
