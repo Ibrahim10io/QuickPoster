@@ -133,7 +133,10 @@ async function runAccessibility(page, browserName, viewportName, route) {
       impact: violation.impact,
       help: violation.help,
       nodes: violation.nodes.length,
-      targets: violation.nodes.slice(0, 4).map((node) => node.target),
+      targets: violation.nodes.map((node) => ({
+        selector: node.target,
+        summary: node.failureSummary || '',
+      })),
     })),
   };
   accessibility.push(entry);
