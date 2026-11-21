@@ -500,8 +500,11 @@ try {
     { name: 'webkit', type: webkit },
   ]) {
     const browser = await engine.type.launch({ headless: true });
-    await testResponsiveAndAccessibility(browser, engine.name);
-    await browser.close();
+    try {
+      await testResponsiveAndAccessibility(browser, engine.name);
+    } finally {
+      await browser.close();
+    }
   }
 
   await testExports();
