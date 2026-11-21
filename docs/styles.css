@@ -2975,3 +2975,7 @@ body:not([data-theme="light"]) .studio-view .template-option small {
 body:not([data-theme="light"]) .studio-view .page-footer {
   color: #c3cede !important;
 }
+
+body:not([data-theme="light"]) .studio-view .page-footer span:first-child {
+  color: #c3cede !important;
+}
