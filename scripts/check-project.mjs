@@ -37,7 +37,7 @@ const checks = [
   ["Saved photo data is restricted to bounded image data URLs", app.includes("candidate.data.length <= 5 * 1024 * 1024") && app.includes("/^data:image\\/(?:jpeg|png|webp);base64,")],
   ["Saved photo positions are finite and clamped", app.includes("Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback")],
   ["Poster export styles avoid color functions unsupported by html2canvas", !/\b(?:color-mix|color|lab|lch|oklab|oklch)\s*\(/i.test(styles)],
-  ["Corrupt saved creations are backed up and reported", app.includes("corrupt-backup.") && app.includes("Une sauvegarde locale illisible a été détectée.")],
+  ["Corrupt saved creations are backed up and reported", app.includes("corrupt-backup.") && app.includes("Une sauvegarde locale illisible a été détectée.") && app.includes("existing?.raw === raw")],
 ];
 
 let failed = 0;
