@@ -7,8 +7,21 @@ const routes = {
 
 
 const storageKey = "quickposter.creations.v1";
+const corruptCreationStorage = new Map();
 function getStorageKey() {
   return cloudUser?.id ? `${storageKey}.user.${cloudUser.id}` : storageKey;
+}
+
+function preserveCorruptCreations(key, raw) {
+  const existing = corruptCreationStorage.get(key);
+  if (existing?.raw === raw) return;
+  const backupKey = `${key}.corrupt-backup.${Date.now()}`;
+  let backupAvailable = false;
+  try {
+    window.localStorage.setItem(backupKey, raw);
+    backupAvailable = true;
+  } catch {}
+  corruptCreationStorage.set(key, { backupKey: backupAvailable ? backupKey : null, backupAvailable, raw });
 }
 const cloudConfig = {
   url: "https://yhghivyejpavymjcbqnr.supabase.co",
@@ -223,10 +236,26 @@ function normalizeCreation(creation) {
 }
 
 function readCreations() {
+  const key = getStorageKey();
+  let raw;
   try {
-    const stored = JSON.parse(window.localStorage.getItem(getStorageKey()) || "[]");
-    return Array.isArray(stored) ? stored.map(normalizeCreation).filter(Boolean) : [];
+    raw = window.localStorage.getItem(key);
   } catch {
+    return [];
+  }
+  if (!raw) return [];
+
+  try {
+    const stored = JSON.parse(raw);
+    if (!Array.isArray(stored)) {
+      preserveCorruptCreations(key, raw);
+      return [];
+    }
+    const normalized = stored.map(normalizeCreation).filter(Boolean);
+    if (normalized.length !== stored.length) preserveCorruptCreations(key, raw);
+    return normalized;
+  } catch {
+    preserveCorruptCreations(key, raw);
     return [];
   }
 }
@@ -348,6 +377,13 @@ function renderSavedCreations() {
   const creations = readCreations().sort((first, second) => (
     new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
   ));
+  const recovery = corruptCreationStorage.get(getStorageKey());
+  const recoveryStatus = document.querySelector("#creations-status");
+  if (recovery && recoveryStatus && !recoveryStatus.textContent) {
+    recoveryStatus.textContent = recovery.backupAvailable
+      ? "Une sauvegarde locale illisible a été détectée. Une copie brute a été conservée sur cet appareil."
+      : "Une sauvegarde locale illisible a été détectée. La copie de secours n’a pas pu être créée.";
+  }
 
   creationList.replaceChildren(...creations.map(createCreationCard));
   historyList.replaceChildren(...creations.map(createHistoryEntry));

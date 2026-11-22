@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 const auth = readFileSync("docs/auth.js", "utf8");
 const html = readFileSync("docs/index.html", "utf8");
 const app = readFileSync("docs/app.js", "utf8");
+const styles = readFileSync("docs/styles.css", "utf8");
 
 const checks = [
   ["Supabase client uses the intended project", auth.includes("https://yhghivyejpavymjcbqnr.supabase.co")],
@@ -35,6 +36,8 @@ const checks = [
   ["Saved colors accept only six-digit hex values", app.includes('/^#[\\da-f]{6}$/i.test(value || "")')],
   ["Saved photo data is restricted to bounded image data URLs", app.includes("candidate.data.length <= 5 * 1024 * 1024") && app.includes("/^data:image\\/(?:jpeg|png|webp);base64,")],
   ["Saved photo positions are finite and clamped", app.includes("Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback")],
+  ["Poster export styles avoid color functions unsupported by html2canvas", !/\b(?:color-mix|color|lab|lch|oklab|oklch)\s*\(/i.test(styles)],
+  ["Corrupt saved creations are backed up and reported", app.includes("corrupt-backup.") && app.includes("Une sauvegarde locale illisible a été détectée.") && app.includes("existing?.raw === raw")],
 ];
 
 let failed = 0;
