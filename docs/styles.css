@@ -1878,7 +1878,7 @@ body[data-theme="light"] .account-tab.is-active { color: #1f5036; }
 .studio-view .poster-product { color:var(--poster-text); font-size:clamp(20px,2.8vw,30px); line-height:1.18; overflow-wrap:anywhere; }
 .studio-view .poster-promotion { margin:5% 0 0; padding:3.5% 4%; color:var(--poster-text); background:var(--poster-accent); font-size:clamp(13px,1.75vw,18px); line-height:1.4; }
 .studio-view .poster-price { margin:4% 0 0; color:var(--poster-text); font-size:clamp(24px,3.2vw,36px); }
-.studio-view .poster-contact { margin:auto 0 0; padding-top:3%; border-color:color-mix(in srgb,var(--poster-text) 25%,transparent); color:var(--poster-muted); font-size:clamp(11px,1.45vw,15px); line-height:1.5; }
+.studio-view .poster-contact { margin:auto 0 0; padding-top:3%; border-color:var(--poster-muted); color:var(--poster-muted); font-size:clamp(11px,1.45vw,15px); line-height:1.5; }
 .studio-view .poster.template-impact { justify-content:flex-start; background:var(--poster-accent); }
 .studio-view .template-impact .poster-name,.studio-view .template-impact .poster-headline,.studio-view .template-impact .poster-product,.studio-view .template-impact .poster-price { color:var(--poster-text); }
 .studio-view .template-impact .poster-description,.studio-view .template-impact .poster-type,.studio-view .template-impact .poster-product-label,.studio-view .template-impact .poster-contact { color:var(--poster-muted); }
