@@ -506,13 +506,12 @@ async function testExports() {
     /copie brute a été conservée/,
     'Une sauvegarde corrompue doit afficher un message de récupération.',
   );
-  assert.equal(
-    await page.evaluate(() => {
-      const key = Object.keys(localStorage).find((item) => item.startsWith('quickposter.creations.v1.corrupt-backup.'));
-      return key ? localStorage.getItem(key) : null;
-    }),
-    '{invalid-json',
-    'Le contenu brut corrompu doit être conservé dans une copie de secours.',
+  assert.deepEqual(
+    await page.evaluate(() => Object.keys(localStorage)
+      .filter((key) => key.startsWith('quickposter.creations.v1.corrupt-backup.'))
+      .map((key) => localStorage.getItem(key))),
+    ['{invalid-json'],
+    'Le contenu brut corrompu doit être conservé une seule fois dans une copie de secours.',
   );
 
   } finally {
