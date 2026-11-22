@@ -176,7 +176,8 @@ async function verifyDownload(page, button, kind, expectedFilename, statusSelect
     throw new Error(`${label}: aucun résultat d’export après le clic. Statut: ${status}. Console: ${recentErrors || 'aucune erreur console capturée'}. ${error.message}`);
   });
   const statusText = await page.locator(statusSelector).textContent();
-  assert.ok(statusText.includes(`${kind.toUpperCase()} généré`), `${label}: ${statusText}`);
+  const recentErrors = consoleErrors.slice(-8).map((entry) => entry.message).join(' | ');
+  assert.ok(statusText.includes(`${kind.toUpperCase()} généré`), `${label}: ${statusText}. Console: ${recentErrors || 'aucune erreur console capturée'}`);
   const downloadResult = await downloadPromise;
   assert.ok(downloadResult.download, `${label}: export annoncé mais téléchargement absent. ${downloadResult.error?.message || ''}`);
   const download = downloadResult.download;
@@ -551,6 +552,7 @@ try {
     exportFiles: results,
     accessibility,
     runtimeErrors,
+    consoleErrors,
     warnings,
   };
   fs.writeFileSync(path.join(artifactDir, 'functional-audit.json'), JSON.stringify(report, null, 2));
@@ -563,6 +565,7 @@ try {
     exportFiles: results,
     accessibility,
     runtimeErrors,
+    consoleErrors,
     warnings,
   };
   fs.writeFileSync(path.join(artifactDir, 'functional-audit.json'), JSON.stringify(report, null, 2));
