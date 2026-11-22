@@ -16,6 +16,7 @@ const server = spawn('python3', ['-m', 'http.server', '4174', '--directory', 'do
   stdio: 'ignore',
 });
 const runtimeErrors = [];
+const consoleErrors = [];
 const accessibility = [];
 const results = [];
 const warnings = [];
@@ -99,6 +100,9 @@ async function preparePage(page, options = {}) {
   page.on('pageerror', (error) => {
     runtimeErrors.push({ page: page.url(), message: error.message });
   });
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push({ page: page.url(), message: message.text() });
+  });
 }
 
 async function navigateTo(page, route, mobile) {
@@ -153,9 +157,29 @@ async function runAccessibility(page, browserName, viewportName, route) {
 
 async function verifyDownload(page, button, kind, expectedFilename, statusSelector, label) {
   const startedAt = Date.now();
-  const downloadPromise = page.waitForEvent('download', { timeout: 120000 });
+  const downloadPromise = page.waitForEvent('download', { timeout: 45000 }).then(
+    (download) => ({ download }),
+    (error) => ({ error }),
+  );
   await button.click();
-  const download = await downloadPromise;
+  await page.waitForFunction(
+    ({ selector, extension }) => {
+      const message = document.querySelector(selector)?.textContent || '';
+      return message.includes(`${extension.toUpperCase()} généré`) ||
+        message.includes(`L’export ${extension.toUpperCase()} a échoué`);
+    },
+    { selector: statusSelector, extension: kind },
+    { timeout: 45000 },
+  ).catch(async (error) => {
+    const status = await page.locator(statusSelector).textContent().catch(() => '<statut indisponible>');
+    const recentErrors = consoleErrors.slice(-5).map((entry) => entry.message).join(' | ');
+    throw new Error(`${label}: aucun résultat d’export après le clic. Statut: ${status}. Console: ${recentErrors || 'aucune erreur console capturée'}. ${error.message}`);
+  });
+  const statusText = await page.locator(statusSelector).textContent();
+  assert.ok(statusText.includes(`${kind.toUpperCase()} généré`), `${label}: ${statusText}`);
+  const downloadResult = await downloadPromise;
+  assert.ok(downloadResult.download, `${label}: export annoncé mais téléchargement absent. ${downloadResult.error?.message || ''}`);
+  const download = downloadResult.download;
   assert.equal(download.suggestedFilename(), expectedFilename, label + ': nom de fichier');
   const outputPath = path.join(downloadDir, label.replace(/[^a-z0-9_-]/gi, '-') + '-' + kind + '-' + Date.now() + '.' + kind);
   await download.saveAs(outputPath);
@@ -293,11 +317,14 @@ async function testResponsiveAndAccessibility(browser, browserName) {
 }
 
 async function testExports() {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 1000 },
-    acceptDownloads: true,
-  });
+  let browser;
+  let context;
+  try {
+    browser = await chromium.launch({ headless: true });
+    context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      acceptDownloads: true,
+    });
   const page = await context.newPage();
   await preparePage(page);
   await page.goto(baseUrl + '/#nouvelle-affiche', { waitUntil: 'domcontentloaded' });
@@ -475,8 +502,10 @@ async function testExports() {
   assert.equal(await page.locator('.creation-card').count(), 0, 'Une sauvegarde JSON corrompue ne doit pas casser la page.');
   warnings.push('Une sauvegarde JSON malformée est ignorée sans bloquer l’application, mais aucun message de récupération visible ni copie de secours automatique n’est actuellement affiché.');
 
-  await context.close();
-  await browser.close();
+  } finally {
+    await context?.close();
+    await browser?.close();
+  }
 }
 
 async function testPreferenceQuota() {
