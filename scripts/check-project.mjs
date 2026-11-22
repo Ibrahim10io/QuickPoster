@@ -36,7 +36,7 @@ const checks = [
   ["Saved colors accept only six-digit hex values", app.includes('/^#[\\da-f]{6}$/i.test(value || "")')],
   ["Saved photo data is restricted to bounded image data URLs", app.includes("candidate.data.length <= 5 * 1024 * 1024") && app.includes("/^data:image\\/(?:jpeg|png|webp);base64,")],
   ["Saved photo positions are finite and clamped", app.includes("Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback")],
-  ["Poster export styles avoid color functions unsupported by html2canvas", !/\\b(?:color-mix|color|lab|lch|oklab|oklch)\\s*\\(/i.test(styles)],
+  ["Poster export styles avoid color functions unsupported by html2canvas", !/\b(?:color-mix|color|lab|lch|oklab|oklch)\s*\(/i.test(styles)],
 ];
 
 let failed = 0;
