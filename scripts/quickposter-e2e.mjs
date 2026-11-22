@@ -501,7 +501,19 @@ async function testExports() {
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.locator('[data-route="mes-creations"]').click();
   assert.equal(await page.locator('.creation-card').count(), 0, 'Une sauvegarde JSON corrompue ne doit pas casser la page.');
-  warnings.push('Une sauvegarde JSON malformée est ignorée sans bloquer l’application, mais aucun message de récupération visible ni copie de secours automatique n’est actuellement affiché.');
+  assert.match(
+    await page.locator('#creations-status').textContent(),
+    /copie brute a été conservée/,
+    'Une sauvegarde corrompue doit afficher un message de récupération.',
+  );
+  assert.equal(
+    await page.evaluate(() => {
+      const key = Object.keys(localStorage).find((item) => item.startsWith('quickposter.creations.v1.corrupt-backup.'));
+      return key ? localStorage.getItem(key) : null;
+    }),
+    '{invalid-json',
+    'Le contenu brut corrompu doit être conservé dans une copie de secours.',
+  );
 
   } finally {
     await context?.close();
