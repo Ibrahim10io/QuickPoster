@@ -13,13 +13,15 @@ function getStorageKey() {
 }
 
 function preserveCorruptCreations(key, raw) {
+  const existing = corruptCreationStorage.get(key);
+  if (existing?.raw === raw) return;
   const backupKey = `${key}.corrupt-backup.${Date.now()}`;
   let backupAvailable = false;
   try {
     window.localStorage.setItem(backupKey, raw);
     backupAvailable = true;
   } catch {}
-  corruptCreationStorage.set(key, { backupKey: backupAvailable ? backupKey : null, backupAvailable });
+  corruptCreationStorage.set(key, { backupKey: backupAvailable ? backupKey : null, backupAvailable, raw });
 }
 const cloudConfig = {
   url: "https://yhghivyejpavymjcbqnr.supabase.co",
