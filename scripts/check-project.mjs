@@ -34,7 +34,7 @@ const checks = [
   ["Saved creations are normalized before use", app.includes("function normalizeCreation(creation)") && app.includes("stored.map(normalizeCreation).filter(Boolean)")],
   ["Poster text limits are explicit and visible", app.includes("const posterTextLimits =") && app.includes("field.maxLength = posterTextLimits[fieldName]") && app.includes("caractères")],
   ["Poster text limits are preserved when reopening creations", app.includes("slice(0, posterTextLimits[field])") && app.includes("updateFieldCounter(fieldName, field?.value ||")],
-  ["Account tabs reference accessible tab panels", html.includes("aria-controls=\\"account-panel-profile\\"") && html.includes("role=\\"tabpanel\\"") && html.includes("aria-labelledby=\\"account-tab-profile\\"")],
+  ["Account tabs reference accessible tab panels", html.includes('aria-controls="account-panel-profile"') && html.includes('role="tabpanel"') && html.includes('aria-labelledby="account-tab-profile"')],
   ["Light studio theme uses high-contrast text and surfaces", styles.includes("body[data-theme=\\"light\\"] .studio-view .field label") && styles.includes("color: #52645c")],
   ["Saved template names are restricted to known templates", app.includes('Object.hasOwn(templateNames, creation.template) ? creation.template : "atelier"')],
   ["Saved colors accept only six-digit hex values", app.includes('/^#[\\da-f]{6}$/i.test(value || "")')],
