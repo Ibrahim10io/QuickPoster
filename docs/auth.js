@@ -111,9 +111,12 @@
       const active = button.dataset.settingsTab === tabName;
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-selected", String(active));
+      button.tabIndex = active ? 0 : -1;
     });
     document.querySelectorAll("[data-settings-panel]").forEach((panel) => {
-      panel.hidden = panel.dataset.settingsPanel !== tabName;
+      const active = panel.dataset.settingsPanel === tabName;
+      panel.hidden = !active;
+      panel.tabIndex = active ? 0 : -1;
     });
   }
 
