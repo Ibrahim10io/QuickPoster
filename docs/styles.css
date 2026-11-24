@@ -2979,3 +2979,44 @@ body:not([data-theme="light"]) .studio-view .page-footer {
 body:not([data-theme="light"]) .studio-view .page-footer span:first-child {
   color: #c3cede !important;
 }
+
+
+/* Audit WCAG : contraste renforcé du studio en thème clair. */
+body[data-theme="light"] .studio-view {
+  --studio-ink: #202a27;
+  --studio-muted: #52645c;
+  --studio-line: #cbd8d0;
+  --studio-panel: #ffffff;
+  color: #202a27;
+}
+body[data-theme="light"] .studio-view .intro-copy,
+body[data-theme="light"] .studio-view .eyebrow,
+body[data-theme="light"] .studio-view .step-indicator,
+body[data-theme="light"] .studio-view .required-note,
+body[data-theme="light"] .studio-view .privacy-note,
+body[data-theme="light"] .studio-view .color-control,
+body[data-theme="light"] .studio-view .edit-hint,
+body[data-theme="light"] .studio-view .preview-empty > span:last-child { color: #52645c; }
+body[data-theme="light"] .studio-view .field label,
+body[data-theme="light"] .studio-view .color-fieldset legend,
+body[data-theme="light"] .studio-view .panel-heading h2 { color: #202a27; }
+body[data-theme="light"] .studio-view .optional-label,
+body[data-theme="light"] .studio-view .field-counter { color: #52645c; }
+body[data-theme="light"] .studio-view .field input,
+body[data-theme="light"] .studio-view .field textarea,
+body[data-theme="light"] .studio-view .assistant-prompt,
+body[data-theme="light"] .studio-view .assistant-result { color: #202a27; background: #ffffff; border-color: #9aaba1; }
+body[data-theme="light"] .studio-view .field input::placeholder,
+body[data-theme="light"] .studio-view .field textarea::placeholder { color: #596a62; opacity: 1; }
+body[data-theme="light"] .studio-view .panel,
+body[data-theme="light"] .studio-view .destination-panel,
+body[data-theme="light"] .studio-view .method-card,
+body[data-theme="light"] .studio-view .poster-stage { color: #202a27; background: #ffffff; border-color: #cbd8d0; }
+body[data-theme="light"] .studio-view .palette-chip,
+body[data-theme="light"] .studio-view .template-option { color: #26352f; background: #f4f7f4; border-color: #aab9b0; }
+body[data-theme="light"] .studio-view .palette-chip.is-selected,
+body[data-theme="light"] .studio-view .template-option.is-selected { color: #17452d; border-color: #247348; background: #e8f4ec; }
+body[data-theme="light"] .studio-view .form-footer { border-color: #cbd8d0; }
+body[data-theme="light"] .studio-view .required-note span,
+body[data-theme="light"] .studio-view .field label > span[aria-hidden="true"] { color: #176b3d; }
+.field-counter { display: block; margin-top: 5px; color: #aeb9c2; font-size: 10px; line-height: 1.4; }
