@@ -182,6 +182,7 @@ const templateNames = {
   editorial: "Éditorial",
 };
 const posterTextFields = ["businessName", "businessType", "headline", "description", "product", "promotion", "price", "contact"];
+const posterTextLimits = { businessName: 100, businessType: 100, headline: 140, description: 280, product: 180, promotion: 140, price: 40, contact: 120 };
 
 function normalizeCreation(creation) {
   if (!creation || typeof creation !== "object" || Array.isArray(creation)) return null;
@@ -189,7 +190,7 @@ function normalizeCreation(creation) {
 
   const texts = Object.fromEntries(posterTextFields.map((field) => [
     field,
-    typeof creation.texts?.[field] === "string" ? creation.texts[field].slice(0, 5000) : "",
+    typeof creation.texts?.[field] === "string" ? creation.texts[field].slice(0, posterTextLimits[field]) : "",
   ]));
   const safeColor = (value, fallback) => /^#[\da-f]{6}$/i.test(value || "") ? value : fallback;
   const colors = {
@@ -446,6 +447,26 @@ if (form) {
     document.querySelector("#product"),
   ];
   const textFields = posterTextFields;
+  const fieldCounters = new Map();
+  const updateFieldCounter = (fieldName, value) => {
+    const counter = fieldCounters.get(fieldName);
+    if (counter) counter.textContent = `${String(value || "").length} / ${posterTextLimits[fieldName]} caractères`;
+  };
+  textFields.forEach((fieldName) => {
+    const field = form.elements.namedItem(fieldName);
+    const wrapper = field?.closest(".field");
+    if (!field || !wrapper) return;
+    field.maxLength = posterTextLimits[fieldName];
+    const counter = document.createElement("small");
+    counter.className = "field-counter";
+    counter.id = `${field.id}-counter`;
+    counter.setAttribute("aria-live", "polite");
+    field.setAttribute("aria-describedby", [field.getAttribute("aria-describedby"), counter.id].filter(Boolean).join(" "));
+    wrapper.append(counter);
+    fieldCounters.set(fieldName, counter);
+    updateFieldCounter(fieldName, field.value);
+    field.addEventListener("input", () => updateFieldCounter(fieldName, field.value));
+  });
   let activeCreationId = null;
   let cachedPosterCanvas = null;
   let cachedPosterKey = null;
@@ -774,7 +795,10 @@ if (form) {
     invalidatePosterCanvas();
     const element = poster.querySelector(`[data-poster-field="${fieldName}"]`);
     if (!element) return;
-    const text = String(value || "").trim();
+    const text = String(value || "").trim().slice(0, posterTextLimits[fieldName]);
+    const field = form.elements.namedItem(fieldName);
+    if (field) field.value = text;
+    updateFieldCounter(fieldName, text);
     const lines = text.split("\n");
     element.replaceChildren(...lines.flatMap((line, index) => (
       index === 0 ? [document.createTextNode(line)] : [document.createElement("br"), document.createTextNode(line)]
@@ -1156,7 +1180,8 @@ if (form) {
     activeCreationId = creation.id;
     textFields.forEach((fieldName) => {
       const field = form.elements.namedItem(fieldName);
-      if (field) field.value = creation.texts[fieldName] || "";
+      if (field) field.value = (creation.texts[fieldName] || "").slice(0, posterTextLimits[fieldName]);
+      updateFieldCounter(fieldName, field?.value || "");
       setPosterText(fieldName, creation.texts[fieldName] || "");
     });
 
@@ -1203,7 +1228,21 @@ if (form) {
     field.addEventListener("change", invalidatePosterCanvas);
   });
 
-  poster.addEventListener("input", invalidatePosterCanvas);
+  poster.addEventListener("input", (event) => {
+    const editable = event.target.closest("[data-poster-field]");
+    if (editable) {
+      const fieldName = editable.dataset.posterField;
+      const limit = posterTextLimits[fieldName];
+      if (limit) {
+        const text = readPosterText(fieldName).slice(0, limit);
+        const field = form.elements.namedItem(fieldName);
+        if (field) field.value = text;
+        updateFieldCounter(fieldName, text);
+        if (readPosterText(fieldName) !== text) setPosterText(fieldName, text);
+      }
+    }
+    invalidatePosterCanvas();
+  });
 
   templateButtons.forEach((button) => {
     button.addEventListener("click", () => {
